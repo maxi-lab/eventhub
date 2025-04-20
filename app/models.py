@@ -73,3 +73,61 @@ class Event(models.Model):
         self.organizer = organizer or self.organizer
 
         self.save()
+
+class Ticket(models.Model):
+    price=models.DecimalField(max_digits=10, decimal_places=2)
+    buy_date=models.DateTimeField(auto_now_add=True) 
+    type_ticket=models.CharField(max_length=50)
+    status=models.CharField(max_length=50, default="active")
+    event=models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tickets")
+    user=models.ForeignKey(User, on_delete=models.CASCADE, related_name="tickets")
+    def __str__(self):
+        return f"{self.type_ticket} - {self.event.title} - {self.user.username}"
+    @classmethod
+    def new(cls, price, type_ticket, event, user):
+        errors = {}
+        if price <= 0:
+            errors["price"] = "El precio debe ser mayor a 0"
+        if type_ticket == "":
+            errors["type_ticket"] = "Por favor ingrese un tipo de ticket"
+        if event is None:
+            errors["event"] = "Por favor seleccione un evento"
+        if user is None:
+            errors["user"] = "Por favor seleccione un usuario"
+
+        if len(errors.keys()) > 0:
+            return False, errors
+
+        Ticket.objects.create(
+            price=price,
+            type_ticket=type_ticket,
+            event=event,
+            user=user,
+        )
+
+        return True, None 
+    @classmethod
+    def delete_ticket(cls, ticket_id):
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+            ticket.delete()
+            return True, None
+        except Ticket.DoesNotExist:
+            return False, {"ticket": "El ticket no existe"}
+    @classmethod
+    def update_ticket(cls, ticket_id, price=None, type_ticket=None, event=None, user=None):
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+            if price is not None:
+                ticket.price = price
+            if type_ticket is not None:
+                ticket.type_ticket = type_ticket
+            if event is not None:
+                ticket.event = event
+            if user is not None:
+                ticket.user = user
+            ticket.save()
+            return True, None
+        except Ticket.DoesNotExist:
+            return False, {"ticket": "El ticket no existe"}
+        
