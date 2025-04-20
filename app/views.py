@@ -125,3 +125,6 @@ def event_form(request, id=None):
         "app/event_form.html",
         {"event": event, "user_is_organizer": request.user.is_organizer},
     )
+
+def tickets(request):
+    return render(request, "app/tickets.html", {})
