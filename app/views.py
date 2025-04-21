@@ -127,7 +127,7 @@ def event_form(request, id=None):
     )
 
 def tickets(request):
-    tickets = Ticket.objects.all()
+    tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
     return render(request, "app/tickets.html", {"tickets": tickets})
 
 def ticket_form(request):

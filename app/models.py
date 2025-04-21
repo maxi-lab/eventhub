@@ -81,6 +81,7 @@ class Ticket(models.Model):
     status=models.CharField(max_length=50, default="active")
     event=models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tickets")
     user=models.ForeignKey(User, on_delete=models.CASCADE, related_name="tickets")
+    is_deleted=models.BooleanField(default=False)
     def __str__(self):
         return f"{self.type_ticket} - {self.event.title} - {self.user.username}"
     @classmethod
@@ -110,7 +111,8 @@ class Ticket(models.Model):
     def delete_ticket(cls, ticket_id):
         try:
             ticket = Ticket.objects.get(id=ticket_id)
-            ticket.delete()
+            ticket.is_deleted=True
+            ticket.save()
             return True, None
         except Ticket.DoesNotExist:
             return False, {"ticket": "El ticket no existe"}
