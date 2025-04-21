@@ -10,10 +10,33 @@
         <a href="{% url 'ticket_form' %}" class="btn btn-primary" >Crear Ticket</a>    
     </div>
     {% if tickets %}
-        {% for tickets in ticket %}
-            <h2>Ticket</h2>
-        {% endfor %}
-    {% endif %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Precio</th>
+                    <th>Fecha de compra</th>
+                    <th>Estado</th>
+                    <th>Tipo de ticket</th>
+                    <th>Evento</th>
+                    <th>Usuario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ticket in tickets %}
+                <td>{{ ticket.price }}</td>
+                <td>{{ ticket.buy_date|date:"d b Y, H:i" }}</td>
+                <td>{{ ticket.status }}</td>
+                <td>{{ ticket.type_ticket }}</td>
+                <td>{{ ticket.event.title }}</td>
+                <td>{{ ticket.user.username }}</td>
+                <td>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                        <button type="submit" class="btn btn-primary">Ver</button>
+                        <button type="submit" class="btn btn-warning">Modificar</button>
+            {% endfor %}
+        </tbody>
+            {% endif %}
     {% if not tickets %}
         <h2>No hay tickets existentes</h2>
     {% endif %}
