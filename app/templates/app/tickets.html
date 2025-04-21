@@ -31,7 +31,10 @@
                 <td>{{ ticket.event.title }}</td>
                 <td>{{ ticket.user.username }}</td>
                 <td>
+                    <form action="{% url 'ticket_delete' ticket.id %}" method="POST" class="d-inline-block">
+                        {% csrf_token %}
                         <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
                         <button type="submit" class="btn btn-primary">Ver</button>
                         <button type="submit" class="btn btn-warning">Modificar</button>
             {% endfor %}

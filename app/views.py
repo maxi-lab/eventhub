@@ -147,3 +147,9 @@ def ticket_form(request):
     events = Event.objects.all()
     users = User.objects.all()
     return render(request, "app/ticket_form.html", {"events":events,"users":users})
+def ticket_delete(request, id):
+    if request.method == "POST":
+        ticket = get_object_or_404(Ticket, pk=id)
+        ticket.delete()
+        return redirect("tickets")
+    return redirect("tickets")
