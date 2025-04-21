@@ -7,6 +7,15 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Tickets</h1>
+        <a href="{% url 'ticket_form' %}" class="btn btn-primary" >Crear Ticket</a>    
     </div>
+    {% if tickets %}
+        {% for tickets in ticket %}
+            <h2>Ticket</h2>
+        {% endfor %}
+    {% endif %}
+    {% if not tickets %}
+        <h2>No hay tickets existentes</h2>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Crear ticket{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>
+            {% if ticket.id %}
+                Editar ticket
+            {% else %}
+                Crear ticket
+            {% endif %}
+        </h1>
+        <form action="{% url 'ticket_form' %}" method="POST">
+            {% csrf_token %}
+            <div class="vstack gap-3">
+                <label for="price" class="form-label">Precio</label>
+                <input type="number" class="form-control" id="precio"  value="{{ ticket.price }}" name="price" required>
+                <label for="buy_date" class="form-label">Fecha de compra</label>
+                <input type="date" class="form-control" id="buy_date" value="{{ ticket.buy_date|date:'Y-m-d' }}" name="buy_date" required>
+                <label for="status" class="form-label">Estado</label>
+                <input type=" text" class="form-control" id="status" value="{{ ticket.status }}" name="status" required>
+                <label for="type_ticket" class="form-label">Tipo de ticket</label>
+                <input type="text" class="form-control" id="type_ticket" value="{{ ticket.type_ticket }}" name="type_ticket" required>
+                <label for="event_id" class="form-label">Evento</label>
+                <select class="form-select" id="event_id" name="event_id" required>
+                    {% for event in events %}
+                        <option value="{{ event.id }}">
+                            {{ event.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="user_id" class="form-label">Usuario</label>
+                <select class="form-select" id="user_id" name="user_id" required>
+                    {% for user in users %}
+                        <option value='{{ user.id }}'>
+                            {{ user.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a href="{% url 'tickets' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </div>
+    </div>
+
+
+{% endblock %}
