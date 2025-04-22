@@ -11,7 +11,7 @@
                 Crear ticket
             {% endif %}
         </h1>
-        <form action="{% url 'ticket_form' %}" method="POST">
+        <form action="{% if ticket.id %} {% url 'ticket_edit' ticket.id %} {% else %} {% url 'ticket_form' %} {% endif %}" method="POST">
             {% csrf_token %}
             <div class="vstack gap-3">
                 <label for="price" class="form-label">Precio</label>

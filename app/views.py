@@ -130,8 +130,10 @@ def tickets(request):
     tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
     return render(request, "app/tickets.html", {"tickets": tickets})
 
-def ticket_form(request):
-    events = Event.objects.all()
+def ticket_form(request,id=None):
+    ticket = {}
+    if id is not None:
+        ticket=get_object_or_404(Ticket, pk=id)
     if request.method == "POST":
         print(request.POST)
         precio=int(request.POST.get("price"))
@@ -141,12 +143,15 @@ def ticket_form(request):
         user_id=request.POST.get("user_id")
         event=get_object_or_404(Event, pk=event_id)
         user=get_object_or_404(User, pk=user_id)
-        Ticket.new(precio,tipo_ticket,event,user)
+        if id is None:
+            print("Creando nuevo ticket")
+            Ticket.new(precio,tipo_ticket,event,user)
+            return redirect("tickets")
+        Ticket.update_ticket(id, precio, tipo_ticket, event, user)
         return redirect("tickets")
-
     events = Event.objects.all()
     users = User.objects.all()
-    return render(request, "app/ticket_form.html", {"events":events,"users":users})
+    return render(request, "app/ticket_form.html", {"events":events,"users":users,"ticket":ticket})
 def ticket_delete(request, id):
     if request.method == "POST":
         Ticket.delete_ticket(id)
