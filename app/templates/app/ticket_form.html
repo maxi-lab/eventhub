@@ -15,7 +15,7 @@
             {% csrf_token %}
             <div class="vstack gap-3">
                 <label for="price" class="form-label">Precio</label>
-                <input type="number" class="form-control" id="precio"  value="{{ ticket.price }}" name="price" required>
+                <input type="text" class="form-control" id="precio"  value="{{ ticket.price }}" name="price" required>
                 <label for="buy_date" class="form-label">Fecha de compra</label>
                 <input type="date" class="form-control" id="buy_date" value="{{ ticket.buy_date|date:'Y-m-d' }}" name="buy_date" required>
                 <label for="status" class="form-label">Estado</label>
