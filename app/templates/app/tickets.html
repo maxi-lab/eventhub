@@ -35,7 +35,7 @@
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </form>
-                        <button type="submit" class="btn btn-primary">Ver</button>
+                        <a href="{% url 'ticket_detail' ticket.id %}"><button type="submit" class="btn btn-primary">Ver</button></a>
                         <button type="submit" class="btn btn-warning">Modificar</button>
             {% endfor %}
         </tbody>

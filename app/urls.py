@@ -16,4 +16,5 @@ urlpatterns = [
     path("tickets/",views.tickets, name="tickets"),
     path("tickets/create/",views.ticket_form, name="ticket_form"),
     path("tickets/<int:id>/delete/",views.ticket_delete, name="ticket_delete"),
+    path("tickets/<int:id>", views.ticket_detail, name="ticket_detail"),
 ]

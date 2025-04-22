@@ -152,3 +152,6 @@ def ticket_delete(request, id):
         Ticket.delete_ticket(id)
         return redirect("tickets")
     return redirect("tickets")
+def ticket_detail(request, id):
+    ticket = get_object_or_404(Ticket, pk=id)
+    return render(request, "app/ticket_detail.html", {"ticket": ticket})
