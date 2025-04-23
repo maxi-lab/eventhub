@@ -150,8 +150,7 @@ def ticket_form(request,id=None):
         Ticket.update_ticket(id, precio, tipo_ticket, event)
         return redirect("tickets")
     events = Event.objects.all()
-    users = User.objects.all()
-    return render(request, "app/ticket_form.html", {"events":events,"users":users,"ticket":ticket})
+    return render(request, "app/ticket_form.html", {"events":events,"ticket":ticket})
 def ticket_delete(request, id):
     if request.method == "POST":
         Ticket.delete_ticket(id)
