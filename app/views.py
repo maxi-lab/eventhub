@@ -137,7 +137,7 @@ def ticket_form(request,id=None):
         ticket=get_object_or_404(Ticket, pk=id)
     if request.method == "POST":
         print(request.POST)
-        precio=int(request.POST.get("price"))
+        precio=float(request.POST.get("price"))
         tipo_ticket=request.POST.get("type_ticket")
         status=request.POST.get("status")
         event_id=request.POST.get("event_id")
