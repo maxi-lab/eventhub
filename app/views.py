@@ -132,6 +132,7 @@ def tickets(request):
 
 def ticket_form(request,id=None):
     ticket = {}
+    user=request.user
     if id is not None:
         ticket=get_object_or_404(Ticket, pk=id)
     if request.method == "POST":
@@ -142,12 +143,11 @@ def ticket_form(request,id=None):
         event_id=request.POST.get("event_id")
         user_id=request.POST.get("user_id")
         event=get_object_or_404(Event, pk=event_id)
-        user=get_object_or_404(User, pk=user_id)
         if id is None:
             print("Creando nuevo ticket")
             Ticket.new(precio,tipo_ticket,event,user)
             return redirect("tickets")
-        Ticket.update_ticket(id, precio, tipo_ticket, event, user)
+        Ticket.update_ticket(id, precio, tipo_ticket, event)
         return redirect("tickets")
     events = Event.objects.all()
     users = User.objects.all()

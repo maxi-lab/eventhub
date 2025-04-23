@@ -30,14 +30,7 @@
                         </option>
                     {% endfor %}
                 </select>
-                <label for="user_id" class="form-label">Usuario</label>
-                <select class="form-select" id="user_id" name="user_id" required>
-                    {% for user in users %}
-                        <option value='{{ user.id }}'>
-                            {{ user.username }}
-                        </option>
-                    {% endfor %}
-                </select>
+                
                 <div class="d-flex justify-content-between mt-4">
                     <button type="submit" class="btn btn-primary">Guardar</button>
                     <a href="{% url 'tickets' %}" class="btn btn-secondary">Cancelar</a>
