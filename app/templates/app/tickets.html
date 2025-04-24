@@ -23,7 +23,13 @@
             <tbody>
             {% for ticket in tickets %}
                 <td>{{ ticket.buy_date|date:"d b Y, H:i" }}</td>
-                <td>{{ ticket.type_ticket }}</td>
+                <td>
+                    {% if ticket.type_ticket == 'GRL' %}
+                        General
+                    {% elif ticket.type_ticket == 'VIP' %}
+                        VIP
+                    {% endif %}
+                </td>
                 <td>{{ ticket.event.title }}</td>
                 <td>{{ ticket.quantity }}</td>
                 <td>

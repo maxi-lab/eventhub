@@ -128,7 +128,8 @@ def event_form(request, id=None):
 
 def tickets(request):
     tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
-    return render(request, "app/tickets.html", {"tickets": tickets})
+    tipo=Ticket.TICKET_TYPES
+    return render(request, "app/tickets.html", {"tickets": tickets, "tipo": tipo})
 
 def ticket_form(request,id=None):
     ticket = {}
@@ -156,4 +157,5 @@ def ticket_delete(request, id):
     return redirect("tickets")
 def ticket_detail(request, id):
     ticket = get_object_or_404(Ticket, pk=id)
-    return render(request, "app/ticket_detail.html", {"ticket": ticket})
+    tipos=Ticket.TICKET_TYPES
+    return render(request, "app/ticket_detail.html", {"ticket": ticket,"tipos":tipos})
