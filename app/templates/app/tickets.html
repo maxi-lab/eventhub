@@ -13,9 +13,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Precio</th>
                     <th>Fecha de compra</th>
-                    <th>Estado</th>
                     <th>Tipo de ticket</th>
                     <th>Evento</th>
                     <th>Cantidad</th>
@@ -24,9 +22,7 @@
             </thead>
             <tbody>
             {% for ticket in tickets %}
-                <td>{{ ticket.price }}</td>
                 <td>{{ ticket.buy_date|date:"d b Y, H:i" }}</td>
-                <td>{{ ticket.status }}</td>
                 <td>{{ ticket.type_ticket }}</td>
                 <td>{{ ticket.event.title }}</td>
                 <td>{{ ticket.quantity }}</td>

@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import random
+import string
 
 
 class User(AbstractUser):
@@ -105,14 +107,16 @@ class Ticket(models.Model):
         
         if len(errors.keys()) > 0:
             return False, errors
+        characters = string.ascii_letters + string.digits
+        code = ''.join(random.choice(characters) for _ in range(10))
         
         Ticket.objects.create(
         type_ticket=type_ticket,
         event=event,
         user=user,
-        quantity=quantity
+        quantity=quantity,
+        code=code,
         )
-
         return True, None 
     @classmethod
     def delete_ticket(cls, ticket_id):
