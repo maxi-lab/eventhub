@@ -71,7 +71,7 @@ def events(request):
 @login_required
 def event_detail(request, id):
     event = get_object_or_404(Event, pk=id)
-    return render(request, "app/event_detail.html", {"event": event})
+    return render(request, "app/event_detail.html", {"event": event, "user_is_organizer": request.user.is_organizer})
 
 
 @login_required
@@ -87,6 +87,14 @@ def event_delete(request, id):
 
     return redirect("events")
 
+def event_tickets(request,id):
+    if not request.user.is_organizer:
+        return redirect("events")
+    event = get_object_or_404(Event, pk=id)
+    tickets = Ticket.objects.filter(event=event,is_deleted=False).order_by("buy_date")
+    for ticket in tickets:
+        print(ticket.is_deleted)
+    return render(request, "app/event_tickets.html", {"event": event, "tickets": tickets})
 
 @login_required
 def event_form(request, id=None):
