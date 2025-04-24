@@ -82,10 +82,11 @@ class Ticket(models.Model):
     event=models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tickets")
     user=models.ForeignKey(User, on_delete=models.CASCADE, related_name="tickets")
     is_deleted=models.BooleanField(default=False)
+    quantity=models.IntegerField(default=1)
     def __str__(self):
         return f"{self.type_ticket} - {self.event.title} - {self.user.username}"
     @classmethod
-    def new(cls, price, type_ticket, event, user):
+    def new(cls, price, type_ticket, event, user,quantity):
         errors = {}
         if price <= 0:
             errors["price"] = "El precio debe ser mayor a 0"
@@ -95,15 +96,19 @@ class Ticket(models.Model):
             errors["event"] = "Por favor seleccione un evento"
         if user is None:
             errors["user"] = "Por favor seleccione un usuario"
-
+        if quantity<=0:
+            errors["quantity"]="Una cantidad positiva"
+        
+        
         if len(errors.keys()) > 0:
             return False, errors
-
+        
         Ticket.objects.create(
-            price=price,
-            type_ticket=type_ticket,
-            event=event,
-            user=user,
+        price=price,
+        type_ticket=type_ticket,
+        event=event,
+        user=user,
+        quantity=quantity
         )
 
         return True, None 
@@ -117,9 +122,11 @@ class Ticket(models.Model):
         except Ticket.DoesNotExist:
             return False, {"ticket": "El ticket no existe"}
     @classmethod
-    def update_ticket(cls, ticket_id, price=None, type_ticket=None, event=None, user=None):
+    def update_ticket(cls, ticket_id, price=None, type_ticket=None, event=None, user=None, quantity=None):
         try:
             ticket = Ticket.objects.get(id=ticket_id)
+            if quantity is not None and quantity >= 0:
+                ticket.quantity = quantity
             if price is not None:
                 ticket.price = price
             if type_ticket is not None:

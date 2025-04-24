@@ -18,7 +18,7 @@
                     <th>Estado</th>
                     <th>Tipo de ticket</th>
                     <th>Evento</th>
-                    <th>Usuario</th>
+                    <th>Cantidad</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -29,7 +29,7 @@
                 <td>{{ ticket.status }}</td>
                 <td>{{ ticket.type_ticket }}</td>
                 <td>{{ ticket.event.title }}</td>
-                <td>{{ ticket.user.username }}</td>
+                <td>{{ ticket.quantity }}</td>
                 <td>
                     <form action="{% url 'ticket_delete' ticket.id %}" method="POST" class="d-inline-block">
                         {% csrf_token %}
