@@ -14,16 +14,15 @@
         <form action="{% if ticket.id %} {% url 'ticket_edit' ticket.id %} {% else %} {% url 'ticket_form' %} {% endif %}" method="POST">
             {% csrf_token %}
             <div class="vstack gap-3">
-                <label for="price" class="form-label">Precio</label>
-                <input type="number" step="0.01" class="form-control" id="precio"  value="{{ ticket.price|stringformat:"f"|cut:","|cut:" "|add:"" }}" name="price" required>
-                <label for="buy_date" class="form-label">Fecha de compra</label>
-                <input type="date" class="form-control" id="buy_date" value="{{ ticket.buy_date|date:'Y-m-d' }}" name="buy_date" required>
                 <label for="quantity" class="form-label">Cantidad de Entradas</label>
                 <input type="number" id="quantity" class="form-control" value="{{ ticket.quantity }}" name="quantity">
-                <label for="status" class="form-label">Estado</label>
-                <input type=" text" class="form-control" id="status" value="{{ ticket.status }}" name="status" required>
                 <label for="type_ticket" class="form-label">Tipo de ticket</label>
-                <input type="text" class="form-control" id="type_ticket" value="{{ ticket.type_ticket }}" name="type_ticket" required>
+                <fieldset>
+                    <input type="radio" name="type_ticket" id="" value="GRL" checked>
+                    <label for="">General</label>
+                    <input type="radio" name="type_ticket" id="" value="VIP">
+                    <label for="">VIP</label>
+                </fieldset>
                 <label for="event_id" class="form-label">Evento</label>
                 <select class="form-select" id="event_id" name="event_id" required>
                     {% for event in events %}

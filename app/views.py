@@ -138,7 +138,6 @@ def ticket_form(request,id=None):
     if request.method == "POST":
         print(request.POST)
         tipo_ticket=request.POST.get("type_ticket")
-        status=request.POST.get("status")
         event_id=request.POST.get("event_id")
         quantity=int(request.POST.get("quantity"))
         event=get_object_or_404(Event, pk=event_id)
