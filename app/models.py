@@ -75,10 +75,15 @@ class Event(models.Model):
         self.save()
 
 class Ticket(models.Model):
-    price=models.DecimalField(max_digits=10, decimal_places=2)
+    GENERAL="GRL"
+    VIP="VIP"
+    TICKET_TYPES=[
+        (GENERAL, "General"),
+        (VIP, "VIP"),
+    ]
     buy_date=models.DateTimeField(auto_now_add=True) 
-    type_ticket=models.CharField(max_length=50)
-    status=models.CharField(max_length=50, default="active")
+    type_ticket=models.CharField(max_length=3, choices=TICKET_TYPES, default=GENERAL)
+    code=models.CharField(max_length=10)
     event=models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tickets")
     user=models.ForeignKey(User, on_delete=models.CASCADE, related_name="tickets")
     is_deleted=models.BooleanField(default=False)
@@ -86,10 +91,8 @@ class Ticket(models.Model):
     def __str__(self):
         return f"{self.type_ticket} - {self.event.title} - {self.user.username}"
     @classmethod
-    def new(cls, price, type_ticket, event, user,quantity):
+    def new(cls, type_ticket, event, user,quantity):
         errors = {}
-        if price <= 0:
-            errors["price"] = "El precio debe ser mayor a 0"
         if type_ticket == "":
             errors["type_ticket"] = "Por favor ingrese un tipo de ticket"
         if event is None:
@@ -104,7 +107,6 @@ class Ticket(models.Model):
             return False, errors
         
         Ticket.objects.create(
-        price=price,
         type_ticket=type_ticket,
         event=event,
         user=user,
@@ -122,13 +124,11 @@ class Ticket(models.Model):
         except Ticket.DoesNotExist:
             return False, {"ticket": "El ticket no existe"}
     @classmethod
-    def update_ticket(cls, ticket_id, price=None, type_ticket=None, event=None, user=None, quantity=None):
+    def update_ticket(cls, ticket_id, type_ticket=None, event=None, user=None, quantity=None):
         try:
             ticket = Ticket.objects.get(id=ticket_id)
             if quantity is not None and quantity >= 0:
                 ticket.quantity = quantity
-            if price is not None:
-                ticket.price = price
             if type_ticket is not None:
                 ticket.type_ticket = type_ticket
             if event is not None:

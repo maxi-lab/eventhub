@@ -137,7 +137,6 @@ def ticket_form(request,id=None):
         ticket=get_object_or_404(Ticket, pk=id)
     if request.method == "POST":
         print(request.POST)
-        precio=float(request.POST.get("price"))
         tipo_ticket=request.POST.get("type_ticket")
         status=request.POST.get("status")
         event_id=request.POST.get("event_id")
@@ -145,9 +144,9 @@ def ticket_form(request,id=None):
         event=get_object_or_404(Event, pk=event_id)
         if id is None:
             print("Creando nuevo ticket")
-            Ticket.new(precio,tipo_ticket,event,user,quantity)
+            Ticket.new(tipo_ticket,event,user,quantity)
             return redirect("tickets")
-        Ticket.update_ticket(id, precio, tipo_ticket, event,quantity=quantity)
+        Ticket.update_ticket(id, tipo_ticket, event,quantity=quantity)
         return redirect("tickets")
     events = Event.objects.all()
     return render(request, "app/ticket_form.html", {"events":events,"ticket":ticket})
