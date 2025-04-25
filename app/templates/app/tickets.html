@@ -36,10 +36,10 @@
                 <td>
                     <form action="{% url 'ticket_delete' ticket.id %}" method="POST" class="d-inline-block">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash" aria-hidden="true"></i></button>
                     </form>
-                        <a href="{% url 'ticket_detail' ticket.id %}"><button type="submit" class="btn btn-primary">Ver</button></a>
-                        <a href="{% url 'ticket_edit' ticket.id %}"><button type="submit" class="btn btn-warning">Modificar</button></a>
+                        <a href="{% url 'ticket_detail' ticket.id %}"><button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye" aria-hidden="true"></i></button></a>
+                        <a href="{% url 'ticket_edit' ticket.id %}"><button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil" aria-hidden="true"></i></button></a>
                     </tr>
                     {% endfor %}
         </tbody>
