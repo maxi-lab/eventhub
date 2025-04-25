@@ -189,3 +189,5 @@ def verify_card(number, expiration_date, cvv,):
     if len(expiration_date) != 5:
         errors["expiration_date"] = "La fecha de expiración debe tener el formato MM/AA"
     return errors
+def terms_policy(request):
+    return render(request, "app/terms.html", {})
