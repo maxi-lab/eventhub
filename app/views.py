@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.http import HttpResponseServerError
 
 from .models import Event, User, Ticket
 
@@ -141,6 +142,7 @@ def tickets(request):
 
 def ticket_form(request,id=None):
     ticket = {}
+    events = Event.objects.all()
     user=request.user
     if id is not None:
         ticket=get_object_or_404(Ticket, pk=id)
@@ -149,6 +151,12 @@ def ticket_form(request,id=None):
         tipo_ticket=request.POST.get("type_ticket")
         event_id=request.POST.get("event_id")
         quantity=int(request.POST.get("quantity"))
+        if quantity < 1:
+            return HttpResponseServerError("Error 500.La cantidad de tickets debe ser mayor a 0")
+        if len(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))!=0:
+            print(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
+            return HttpResponseServerError(verify_card(request.POST.get("number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
+        
         event=get_object_or_404(Event, pk=event_id)
         if id is None:
             print("Creando nuevo ticket")
@@ -156,7 +164,6 @@ def ticket_form(request,id=None):
             return redirect("tickets")
         Ticket.update_ticket(id, tipo_ticket, event,quantity=quantity)
         return redirect("tickets")
-    events = Event.objects.all()
     return render(request, "app/ticket_form.html", {"events":events,"ticket":ticket})
 def ticket_delete(request, id):
     if request.method == "POST":
@@ -167,3 +174,18 @@ def ticket_detail(request, id):
     ticket = get_object_or_404(Ticket, pk=id)
     tipos=Ticket.TICKET_TYPES
     return render(request, "app/ticket_detail.html", {"ticket": ticket,"tipos":tipos})
+
+def verify_card(number, expiration_date, cvv,):
+    errors={}
+    if number is None or expiration_date is None or cvv is None:
+        errors["number"] = "El número de tarjeta no puede ser nulo"
+        errors["expiration_date"] = "La fecha de expiración no puede ser nula"
+        errors["cvv"] = "El CVV no puede ser nulo"
+        return errors
+    if len(number) != 16 or number.isdigit() == False:
+        errors["number"] = "El número de tarjeta debe tener 16 dígitos"
+    if len(cvv) != 3:
+        errors["cvv"] = "El CVV debe tener 3 dígitos"
+    if len(expiration_date) != 5:
+        errors["expiration_date"] = "La fecha de expiración debe tener el formato MM/AA"
+    return errors
