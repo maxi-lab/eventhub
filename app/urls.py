@@ -15,4 +15,5 @@ urlpatterns = [
     path("events/<int:id>/delete/", views.event_delete, name="event_delete"),
     path('notificacionsUser/', views.notificationsUser, name='notificationsUser'),
     path('notificationsOrganizer/', views.notificationsOrganizer, name='notificationsOrganizer'),
+    path('notificationsCreate/', views.notificationsCreate, name='notificationsCreate'),
 ]

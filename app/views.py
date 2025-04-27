@@ -133,3 +133,37 @@ def notificationsUser(request):
 @login_required
 def notificationsOrganizer(request):
     return render(request, "notifications/notificationsOrganizer.html")
+
+@login_required
+def notificationsCreate(request):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        message = request.POST.get('message')
+        user_id = request.POST.get('user')
+        priority = request.POST.get('priority')
+
+        priority_map = {
+            'baja': 'LOW',
+            'media': 'MEDIUM',
+            'alta': 'HIGH',
+        }
+        priority_value = priority_map.get(priority.lower(), 'MEDIUM')
+
+        notification = Notification.objects.create(
+            title=title,
+            message=message,
+            priority=priority_value
+        )
+
+        if user_id:
+            user = User.objects.get(id=user_id)
+            UserNotification.objects.create(
+                user=user,
+                notification=notification
+            )
+
+        # return redirect('')
+
+    events = Event.objects.all()
+    users = User.objects.all()
+    return render(request, 'notifications/notificationsCreate.html', {'events': events, 'users': users})
