@@ -6,6 +6,7 @@ Aplicación web para venta de entradas utilizada en la cursada 2025 de Ingenier�
 - Máximo Preneste
 - Tomás Martin
 - Emiliano Di Grappa
+- Santiago Natalichio Bestosini
 
 ## Dependencias
 
