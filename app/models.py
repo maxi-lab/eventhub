@@ -73,3 +73,46 @@ class Event(models.Model):
         self.organizer = organizer or self.organizer
 
         self.save()
+
+class Comment(models.Model):
+    title = models.TextField(max_length=50)
+    text = models.TextField(max_length=300)
+    created_at = models.DateTimeField(auto_now_add=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="published_comments")
+
+    def __str__(self):
+        return f"{self.title} by {User.objects.get(self.user).username}"
+
+    @classmethod
+    def validate(cls, title, text, user_id, event_id):
+        errors = {}
+        if not title:
+            errors ["title"] = "El título es requerido"
+        if not text:
+            errors ["text"] = "El cuerpo es requerido"
+        if not User.objects.filter(id=user_id).exists():
+            errors ["user"] = "El usuario no existe"
+        if not Event.objects.filter(id=event_id).exists():
+            errors ["event"] = "El evento no existe"
+        return errors
+
+    @classmethod
+    def new(cls, title, text, user_id, event_id):
+        errors=Comment.validate(title, text, user_id, event_id)
+
+        if len(errors.keys()) > 0:
+            return False, errors
+        
+        Comment.objects.create(
+            title=title,
+            text=text,
+            user=user_id,
+            event=event_id,
+        )
+        return True, None
+    
+    def Update(self, title, text):
+        self.title = title or self.title
+        self.text = text or self.text
+        self.save()
