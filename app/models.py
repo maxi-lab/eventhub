@@ -98,6 +98,7 @@ class Notification(models.Model):
         default=Priority.MEDIUM,
     )
     users = models.ManyToManyField(User, through='UserNotification', related_name="notifications")
+    events = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="notifications", null=True, blank=True)
 
 
 
