@@ -73,3 +73,32 @@ class Event(models.Model):
         self.organizer = organizer or self.organizer
 
         self.save()
+
+class UserNotification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    notification = models.ForeignKey('Notification', on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user', 'notification')
+
+
+class Priority(models.TextChoices):
+    HIGH = "HIGH", "High"
+    MEDIUM = "MEDIUM", "Medium"
+    LOW = "LOW", "Low"
+
+class Notification(models.Model):
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    priority = models.CharField(
+        max_length=10,
+        choices=Priority.choices,
+        default=Priority.MEDIUM,
+    )
+    users = models.ManyToManyField(User, through='UserNotification', related_name="notifications")
+
+
+
+
