@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Gestión de Notificaciones</h1>
+      <a href="#" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i> Crear Notificación
+      </a>
+    </div>
+
+    <div class=" mb-3 p-2 card shadow-sm d-flex flex-row align-items-center justify-content-between">
+      <div class="col-md-3 m-2">
+        <input type="text" class="form-control" placeholder="Buscar notificaciones...">
+      </div>
+      <div class="col-md-3 m-2">
+        <select class="form-select">
+          <option selected>Todos los eventos</option>
+          <option>Concierto de Rock</option>
+          <option>Festival de Gastronomía</option>
+          <option>Conferencia de Tecnología</option>
+        </select>
+      </div>
+      <div class="col-md-3 m-2">
+        <select class="form-select">
+          <option selected>Todas las prioridades</option>
+          <option>Normal</option>
+          <option>Alta</option>
+          <option>Baja</option>
+        </select>
+      </div>
+      <div class="col-md-2 m-2">
+        <button class="btn btn-outline-primary w-100">Filtrar</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Título</th>
+            <th>Evento</th>
+            <th>Destinatarios</th>
+            <th>Prioridad</th>
+            <th>Fecha de envío</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Confirmación de entrada</td>
+            <td><a href="#" class="text-primary text-decoration-none">Concierto de Rock</a></td>
+            <td><span class="badge bg-info rounded-pill">Todos (45)</span></td>
+            <td><span class="badge bg-primary rounded-pill">Normal</span></td>
+            <td>10 abr 2025, 15:35</td>
+            <td>
+              <button class="btn btn-outline-primary btn-sm me-1"><i class="bi bi-eye"></i></button>
+              <button class="btn btn-outline-warning btn-sm me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>Cambio de ubicación</td>
+            <td><a href="#" class="text-primary text-decoration-none">Festival de Gastronomía</a></td>
+            <td><span class="badge bg-info rounded-pill">Todos (28)</span></td>
+            <td><span class="badge bg-danger rounded-pill">Alta</span></td>
+            <td>15 abr 2025, 10:25</td>
+            <td>
+              <button class="btn btn-outline-primary btn-sm me-1"><i class="bi bi-eye"></i></button>
+              <button class="btn btn-outline-warning btn-sm me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>Reembolso aprobado</td>
+            <td><a href="#" class="text-primary text-decoration-none">Conferencia de Tecnología</a></td>
+            <td><span class="badge bg-secondary rounded-pill">Usuario específico</span></td>
+            <td><span class="badge bg-primary rounded-pill">Normal</span></td>
+            <td>22 abr 2025, 17:00</td>
+            <td>
+              <button class="btn btn-outline-primary btn-sm me-1"><i class="bi bi-eye"></i></button>
+              <button class="btn btn-outline-warning btn-sm me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>Recordatorio de evento</td>
+            <td><a href="#" class="text-primary text-decoration-none">Concierto de Rock</a></td>
+            <td><span class="badge bg-info rounded-pill">Todos (45)</span></td>
+            <td><span class="badge bg-primary rounded-pill">Normal</span></td>
+            <td>14 may 2025, 10:00</td>
+            <td>
+              <button class="btn btn-outline-primary btn-sm me-1"><i class="bi bi-eye"></i></button>
+              <button class="btn btn-outline-warning btn-sm me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td>Información adicional</td>
+            <td><a href="#" class="text-primary text-decoration-none">Festival de Gastronomía</a></td>
+            <td><span class="badge bg-info rounded-pill">Todos (28)</span></td>
+            <td><span class="badge bg-secondary rounded-pill">Baja</span></td>
+            <td>18 abr 2025, 14:20</td>
+            <td>
+              <button class="btn btn-outline-primary btn-sm me-1"><i class="bi bi-eye"></i></button>
+              <button class="btn btn-outline-warning btn-sm me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+{% endblock %}

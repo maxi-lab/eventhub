@@ -22,12 +22,26 @@
 </head>
 
 <body>
-    <!-- Navbar solo visible si el usuario está autenticado -->
     <nav class="navbar navbar-expand-md bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">EventHub</a>
-
             <div class="hstack gap-2">
+                {% if user.is_authenticated %}
+                    {% if not user.is_organizer %}
+                        <!-- Botón para usuarios normales -->
+                        <a class="nav-link position-relative" href="{% url 'notificationsUser' %}">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">
+                                3
+                            </span>
+                        </a>
+                    {% else %}
+                        <!-- Botón para organizadores -->
+                        <a class="btn btn-sm btn-outline-warning" href="{% url 'notificationsOrganizer' %}">
+                            Notificaciones
+                        </a>
+                    {% endif %}
+                {% endif %}
                 {% if user.is_authenticated %}
                     <button
                         class="navbar-toggler"
