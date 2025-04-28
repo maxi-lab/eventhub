@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de ticket{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Detalle de Ticket</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Detalles del Ticket</h5>
+            <p class="card-text"><strong>Fecha de compra:</strong> {{ ticket.buy_date|date:"d b Y, H:i" }}</p>
+            <p class="card-text"><strong>Tipo de ticket:</strong> 
+                {% if ticket.type_ticket == 'GRL' %}
+                    General
+                {% elif ticket.type_ticket == 'VIP' %}
+                    VIP
+                {% endif %}
+            </p>
+            <p class="card-text"><strong>Evento:</strong> {{ ticket.event.title }}</p>
+            <p class="card-text"><strong>Cantidad:</strong> {{ ticket.quantity }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

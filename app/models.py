@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import random
+import string
 
 
 class User(AbstractUser):
@@ -73,3 +75,72 @@ class Event(models.Model):
         self.organizer = organizer or self.organizer
 
         self.save()
+
+class Ticket(models.Model):
+    GENERAL="GRL"
+    VIP="VIP"
+    TICKET_TYPES=[
+        (GENERAL, "General"),
+        (VIP, "VIP"),
+    ]
+    buy_date=models.DateTimeField(auto_now_add=True) 
+    type_ticket=models.CharField(max_length=3, choices=TICKET_TYPES, default=GENERAL)
+    code=models.CharField(max_length=10)
+    event=models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tickets")
+    user=models.ForeignKey(User, on_delete=models.CASCADE, related_name="tickets")
+    is_deleted=models.BooleanField(default=False)
+    quantity=models.IntegerField(default=1)
+    def __str__(self):
+        return f"{self.type_ticket} - {self.event.title} - {self.user.username}"
+    @classmethod
+    def new(cls, type_ticket, event, user,quantity):
+        errors = {}
+        if type_ticket == "":
+            errors["type_ticket"] = "Por favor ingrese un tipo de ticket"
+        if event is None:
+            errors["event"] = "Por favor seleccione un evento"
+        if user is None:
+            errors["user"] = "Por favor seleccione un usuario"
+        if quantity<=0:
+            errors["quantity"]="Una cantidad positiva"
+        
+        
+        if len(errors.keys()) > 0:
+            return False, errors
+        characters = string.ascii_letters + string.digits
+        code = ''.join(random.choice(characters) for _ in range(10))
+        
+        Ticket.objects.create(
+        type_ticket=type_ticket,
+        event=event,
+        user=user,
+        quantity=quantity,
+        code=code,
+        )
+        return True, None 
+    @classmethod
+    def delete_ticket(cls, ticket_id):
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+            ticket.is_deleted=True
+            ticket.save()
+            return True, None
+        except Ticket.DoesNotExist:
+            return False, {"ticket": "El ticket no existe"}
+    @classmethod
+    def update_ticket(cls, ticket_id, type_ticket=None, event=None, user=None, quantity=None):
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+            if quantity is not None and quantity >= 0:
+                ticket.quantity = quantity
+            if type_ticket is not None:
+                ticket.type_ticket = type_ticket
+            if event is not None:
+                ticket.event = event
+            if user is not None:
+                ticket.user = user
+            ticket.save()
+            return True, None
+        except Ticket.DoesNotExist:
+            return False, {"ticket": "El ticket no existe"}
+        

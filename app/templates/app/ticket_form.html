@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Crear ticket{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>
+            {% if ticket.id %}
+                Editar ticket
+            {% else %}
+                Comprar ticket
+            {% endif %}
+        </h1>
+        <form action="{% if ticket.id %} {% url 'ticket_edit' ticket.id %} {% else %} {% url 'ticket_form' %} {% endif %}" method="POST">
+            {% csrf_token %}
+            <div class="vstack gap-3">
+                <label for="quantity" class="form-label">Cantidad de Entradas</label>
+                <input type="number" id="quantity" class="form-control" value="{{ ticket.quantity }}" name="quantity" required>
+                <label for="type_ticket" class="form-label">Tipo de ticket</label>
+                <fieldset>
+                    <input type="radio" name="type_ticket" id="" value="GRL" checked>
+                    <label for="">General</label>
+                    <input type="radio" name="type_ticket" id="" value="VIP">
+                    <label for="">VIP</label>
+                </fieldset>
+                <label for="event_id" class="form-label">Evento</label>
+                <select class="form-select" id="event_id" name="event_id" required>
+                    {% for event in events %}
+                        <option value="{{ event.id }}">
+                            {{ event.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="">Numero de tarjeta</label>
+                <input type="number" name="card_number" id="card_number" class="form-control" required>
+                <label for="">Vencimiento</label>
+                <input type="text" name="expiration_date" id="expiration_date" class="form-control" required>
+                <label for="">CVV</label>
+                <input type="number" name="cvv" id="cvv" class="form-control" required>
+                <label for="">Nombre del titular</label>
+                <input type="text" name="cardholder_name" id="cardholder_name" class="form-control" required>
+               <fieldset>
+                 <input type="checkbox" name="" id="" required>
+                <label for="">He leido y acepto los <a href="{% url 'terms_policy' %}">Terminos y condiciones y la polica de privacidad</a></label>
+            </fieldset>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">Confirmar Compra</button>
+                    <a href="{% url 'tickets' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </div>
+    </div>
+
+
+{% endblock %}
