@@ -126,3 +126,19 @@ def event_form(request, id=None):
         "app/event_form.html",
         {"event": event, "user_is_organizer": request.user.is_organizer},
     )
+
+@login_required
+def save_comment(request, id):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        text = request.POST.get('text')
+        event = get_object_or_404(Event, id=id)
+
+        Comment.objects.create(
+            title=title,
+            text=text,
+            user=request.user,
+            event=event,
+        )
+        return redirect('event_detail', id=id)
+    return redirect('events')

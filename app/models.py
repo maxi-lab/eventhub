@@ -82,7 +82,7 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="published_comments")
 
     def __str__(self):
-        return f"{self.title} by {User.objects.get(self.user).username}"
+        return f"{self.title} by {self.user.username}"
 
     @classmethod
     def validate(cls, title, text, user_id, event_id):

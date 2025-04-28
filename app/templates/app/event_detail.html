@@ -46,8 +46,8 @@
     </div>
     <div class="row">
         <div class="card">
-            <h style="font-weight: bold">Comentarios ({{comments.length}})</h>
-            {% if comment %}
+            <h style="font-weight: bold">Comentarios ({{comments.count}})</h>
+            {% if comments %}
                 {% for comment in comments %}
                     <div class="comment">
                         <h>{{comment.user.username}}</h>
@@ -61,11 +61,14 @@
                     <h>No hay comentarios</h>
                     <hr>
             {% endif %}
-            <h>Título del comentario *</h>
-            <textarea placeholder="Escribe un título para tu comentario..." maxlength="50" rows="1"></textarea>
-            <h>Contenido del comentario *</h>
-            <textarea placeholder="Escribe tu comentario aquí..." maxlemgth="300" rows="5"></textarea>
-            <button style="height: 10%; width: 12%; background-color: blue; color: white">Publicar comentario</button>
+            <form action="{% url 'save_comment' event.id %}" method="POST" style="display: flex; flex-direction: column;">
+                {% csrf_token %}
+                <label>Título del comentario *</label>
+                <textarea name="title" placeholder="Escribe un título para tu comentario..." maxlength="50" rows="1"></textarea>
+                <label>Contenido del comentario *</label>
+                <textarea name="text" placeholder="Escribe tu comentario aquí..." maxlength="300" rows="5"></textarea>
+                <button id="publish_button" style="height: 10%; width: 12%; background-color: blue; color: white">Publicar comentario</button>
+            </form>
         </div>
     </div>
 </div>
