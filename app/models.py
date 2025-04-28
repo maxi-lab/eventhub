@@ -107,8 +107,8 @@ class Comment(models.Model):
         Comment.objects.create(
             title=title,
             text=text,
-            user=user_id,
-            event=event_id,
+            user=User.objects.get(id = user_id),
+            event=Event.objects.get(id = event_id),
         )
         return True, None
     

@@ -3,8 +3,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-
-from .models import Event, User
+from .models import Event, User, Comment
 
 
 def register(request):
@@ -71,7 +70,9 @@ def events(request):
 @login_required
 def event_detail(request, id):
     event = get_object_or_404(Event, pk=id)
-    return render(request, "app/event_detail.html", {"event": event})
+    comments = Comment.objects.filter(event = event)
+
+    return render(request, "app/event_detail.html", {"event": event, "comments":comments})
 
 
 @login_required
