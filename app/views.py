@@ -150,8 +150,8 @@ def edit_comment(request, id):
     comment = get_object_or_404(Comment, id = id, user = request.user)
 
     if (request.method == "POST"):
-        comment.title = request.POST.get('title')
-        comment.text = request.POST.get('text')
+        comment.title = request.POST.get('title') or comment.title
+        comment.text = request.POST.get('text') or comment.text
         comment.save()
         return redirect('event_detail', id=comment.event.id)
     return redirect('event_detail', id=comment.event.id)
