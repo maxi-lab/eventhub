@@ -70,9 +70,11 @@ def events(request):
 @login_required
 def event_detail(request, id):
     event = get_object_or_404(Event, pk=id)
-    comments = Comment.objects.filter(event = event)
+    user_comments = Comment.objects.filter(event = event, user = request.user)
+    other_comments = Comment.objects.filter(event = event).exclude(user = request.user)
+    comments_count = user_comments.count() + other_comments.count()
 
-    return render(request, "app/event_detail.html", {"event": event, "comments":comments})
+    return render(request, "app/event_detail.html", {"event": event, "user_comments": user_comments, "other_comments": other_comments, "comments_count": comments_count})
 
 
 @login_required
@@ -142,3 +144,14 @@ def save_comment(request, id):
         )
         return redirect('event_detail', id=id)
     return redirect('events')
+
+@login_required
+def edit_comment(request, id):
+    comment = get_object_or_404(Comment, id = id, user = request.user)
+
+    if (request.method == "POST"):
+        comment.title = request.POST.get('title')
+        comment.text = request.POST.get('text')
+        comment.save()
+        return redirect('event_detail', id=comment.event.id)
+    return redirect('event_detail', id=comment.event.id)

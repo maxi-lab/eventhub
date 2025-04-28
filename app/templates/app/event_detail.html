@@ -46,23 +46,56 @@
     </div>
     <div class="card">
         <div class="row" style="background-color: lightgray; width: 100%; height: 30px; align-items: center;">
-            <h style="font-weight: bold">Comentarios ({{comments.count}})</h>
+            <h style="font-weight: bold">Comentarios ({{comments_count}})</h>
         </div>
         <div class="row">
             <div class="card-body">
-                {% if comments %}
-                    {% for comment in comments %}
-                        <div class="comment">
-                            <h>{{comment.user.username}}</h>
-                            <p>{{comment.created_at}}</p>
-                            <h>{{comment.title}}</h>
-                            <P>{{comment.text}}</p>
+                {% if user_comments %}
+                    {% for user_comment in user_comments %}
+                        <div class="comment" id="comment-{{ user_comment.id }}">
+                            <div class="d-flex justify-content-between align-items-center"
+                            <h>Tú</h>
+                            <div style= "position: relative;">
+                                <button class="menu_button" style="background: lightgray; border: none; cursor: pointer;">&#8942;</button>
+                                <div class="menu-options" style= "display: none; position: absolute; rigth: 0; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                                    <a href="javascript:void(0);" onclick="editComment({{ user_comment.id }})" style="display: block; padding: 5px 10px; text-decoration: none; color: black;">Editar</a>
+                                    <a style="display: block; padding: 5px 10px; text-decoration: none; color: red;">Eliminar</a>
+                                </div>
+                            </div>
+                            </div>
+                            <p>{{user_comment.created_at}}</p>
+                            <div class="comment-view">
+                                <h>{{user_comment.title}}</h>
+                                <P>{{user_comment.text}}</p>
+                            </div>
+                            <div class="comment-edit" style="display: none;">
+                                <form action="{% url 'edit_comment' user_comment.id %}" method="POST" style="display: flex; flex-direction: column; gap: 10px;">
+                                    {% csrf_token %}
+                                    <input type="text" name="title" value="{{ user_comment.title }}" maxlength="50">
+                                    <textarea name="text" maxlength="300" rows="5">{{ user_comment.text }}</textarea>
+                                    <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                                    <button type="button" onclick="cancelEdit({{ user_comment.id }})" class="btn btn-secondary btn-sm">Cancelar</button>
+                                </form>
+                            </div>
                         </div>
                         <hr>
                     {% endfor %}
-                {% else %}
-                        <h>No hay comentarios</h>
+                {% endif %}
+
+                {% if other_comments %}
+                    {% for other_comment in other_comments %}
+                        <div class="comment">
+                            <h>{{other_comment.user.username}}</h>
+                            <p>{{other_comment.created_at}}</p>
+                            <h>{{other_comment.title}}</h>
+                            <P>{{other_comment.text}}</p>
+                        </div>
                         <hr>
+                    {% endfor %}
+                {% endif %}
+                {% if comments_count == 0 %}
+                    <h>No hay comentarios</h>
+                    <hr>
                 {% endif %}
                 <form action="{% url 'save_comment' event.id %}" method="POST" style="display: flex; flex-direction: column;">
                     {% csrf_token %}
@@ -70,10 +103,34 @@
                     <textarea name="title" placeholder="Escribe un título para tu comentario..." maxlength="50" rows="1"></textarea>
                     <label>Contenido del comentario *</label>
                     <textarea name="text" placeholder="Escribe tu comentario aquí..." maxlength="300" rows="5"></textarea>
-                    <button id="publish_button" style="height: 10%; width: 12%; background-color: blue; color: white">Publicar comentario</button>
+                    <button id="publish_button" style="background-color: #0a6efa; width: 14%; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Publicar comentario</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+<script>
+    document.querySelectorAll('.menu_button').forEach(button => {
+        button.addEventListener('click', function(e){
+            e.stopPropagation();
+            const menu = this.nextElementSibling;
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+
+    function editComment(commentId) {
+        const viewDiv = document.querySelector(`#comment-${commentId} .comment-view`);
+        const editDiv = document.querySelector(`#comment-${commentId} .comment-edit`);
+        viewDiv.style.display = 'none';
+        editDiv.style.display = 'block';
+    }
+
+    function cancelEdit(commentId) {
+        const viewDiv = document.querySelector(`#comment-${commentId} .comment-view`);
+        const editDiv = document.querySelector(`#comment-${commentId} .comment-edit`);
+        viewDiv.style.display = 'block';
+        editDiv.style.display = 'none';
+    }
+</script>
+
 {% endblock %}
