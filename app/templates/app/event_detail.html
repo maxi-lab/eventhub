@@ -44,5 +44,29 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="card">
+            <h style="font-weight: bold">Comentarios ({{comments.length}})</h>
+            {% if comment %}
+                {% for comment in comments %}
+                    <div class="comment">
+                        <h>{{comment.user.username}}</h>
+                        <p>{{comment.created_at}}</p>
+                        <h>{{comment.title}}</h>
+                        <P>{{comment.text}}</p>
+                    </div>
+                    <hr>
+                {% endfor %}
+            {% else %}
+                    <h>No hay comentarios</h>
+                    <hr>
+            {% endif %}
+            <h>Título del comentario *</h>
+            <textarea placeholder="Escribe un título para tu comentario..." maxlength="50" rows="1"></textarea>
+            <h>Contenido del comentario *</h>
+            <textarea placeholder="Escribe tu comentario aquí..." maxlemgth="300" rows="5"></textarea>
+            <button style="height: 10%; width: 12%; background-color: blue; color: white">Publicar comentario</button>
+        </div>
+    </div>
 </div>
 {% endblock %}
