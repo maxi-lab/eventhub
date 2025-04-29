@@ -31,6 +31,42 @@ class Category(models.Model):
     description = models.TextField()
     is_active = models.BooleanField(default=True)
 
+    def __str__(self) -> str:
+        return self.name
+        
+    @classmethod
+    def validate(cls, name, description, is_active):
+        errors = {}
+
+        if name == "":
+            errors["name"] = "Por favor ingrese un nombre"
+
+        if description == "":
+            errors["description"] = "Por favor ingrese una descripcion"
+
+        return errors
+
+    @classmethod
+    def new(cls, name, description, is_active):
+        errors = Category.validate(name, description, is_active)
+
+        if len(errors.keys()) > 0:
+            return False, errors
+
+        Category.objects.create(
+            name=name,
+            description=description,
+            is_active=is_active,
+        )
+
+        return True, None
+
+    def update(self, name, description, is_active):
+        self.name = name or self.name
+        self.description = description or self.description
+        self.is_active = is_active 
+
+        self.save()
 
 
 class Event(models.Model):
