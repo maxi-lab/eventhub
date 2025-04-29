@@ -29,7 +29,11 @@
         <tbody>
             {% for category in categories %}
                 <tr>
-                    <td class="text-primary font-weight-bold">{{ category.name }}</td>
+                    {% if category.is_active %}
+                        <td class="text-primary font-weight-bold">{{ category.name }}</td>
+                    {% else %}
+                        <td class="text-danger font-weight-bold">{{ category.name }}</td>
+                    {% endif %}
                     <td>{{ category.description }}</td>
                     <td> {{ category.event_count }} Eventos </td>
                     <td>
