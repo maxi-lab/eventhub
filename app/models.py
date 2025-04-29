@@ -145,10 +145,10 @@ class Ticket(models.Model):
             return False, {"ticket": "El ticket no existe"}
         
 
-class RefoundRequest(models.model):
+class RefundRequest(models.Model):
     ticket=models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="refound_requests")
     approval_date=models.DateTimeField(null=True, blank=True)
     created_at=models.DateTimeField(auto_now_add=True)
     reason=models.TextField()
     status=models.CharField(max_length=10, choices=[("PENDING", "Pendiente"), ("APPROVED", "Aprobada"), ("DENIED", "Denegada")], default="PENDING")
-
+        
