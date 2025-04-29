@@ -149,3 +149,37 @@ def category_delete(request, id):
         return redirect("categories")
 
     return redirect("categories")
+
+
+@login_required
+def category_form(request, id=None):
+    user = request.user
+    print(f"{request.method} de categoria {id}")
+
+    if not user.is_organizer:
+        return redirect("categories")
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        is_active = request.POST.get("is_active") is not None
+        print(f"{name} - {description} {is_active}")
+
+
+        if id is None:
+            Category.new(name, description, is_active)
+        else:
+            category = get_object_or_404(Category, pk=id)
+            category.update(name, description, is_active)
+
+        return redirect("categories")
+
+    category = {}
+    if id is not None:
+        category = get_object_or_404(Category, pk=id)
+
+    return render(
+        request,
+        "app/category_form.html",
+        {"category": category, "user_is_organizer": request.user.is_organizer},
+    )
