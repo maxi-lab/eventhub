@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 import random
 import string
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -146,9 +147,83 @@ class Ticket(models.Model):
         
 
 class RefundRequest(models.Model):
-    ticket=models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="refound_requests")
+    ticket=models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="refund_requests")
     approval_date=models.DateTimeField(null=True, blank=True)
     created_at=models.DateTimeField(auto_now_add=True)
     reason=models.TextField()
     status=models.CharField(max_length=10, choices=[("PENDING", "Pendiente"), ("APPROVED", "Aprobada"), ("DENIED", "Denegada")], default="PENDING")
-        
+    @classmethod
+    def create_request(cls, user, ticket_code, reason):
+        errors = {}
+
+        try:
+            ticket = Ticket.objects.get(code=ticket_code, user=user)
+        except Ticket.DoesNotExist:
+            errors["ticket"] = "No se encontró un ticket con ese código para este usuario"
+            return False, errors
+
+        if reason.strip() == "":
+            errors["reason"] = "Debe ingresar un motivo"
+            return False, errors
+
+        if cls.objects.filter(ticket=ticket, status="PENDING").exists():
+            errors["request"] = "Ya existe una solicitud pendiente para este ticket"
+            return False, errors
+
+        cls.objects.create(ticket=ticket, reason=reason)
+        return True, None
+    
+    @classmethod
+    def edit_request(cls, user, request_id, new_reason):
+        errors = {}
+
+        try:
+            request = cls.objects.get(id=request_id)
+        except cls.DoesNotExist:
+            errors["request"] = "La solicitud no existe"
+            return False, errors
+
+        if request.status != "PENDING":
+            errors["status"] = "Solo se pueden editar solicitudes pendientes"
+            return False, errors
+
+        if new_reason.strip() == "":
+            errors["reason"] = "El motivo no puede estar vacío"
+            return False, errors
+
+        request.reason = new_reason
+        request.save()
+        return True, None
+    
+    @classmethod
+    def delete_request(cls, user, request_id):
+        errors = {}
+
+        try:
+            request = cls.objects.get(id=request_id)
+        except cls.DoesNotExist:
+            errors["request"] = "La solicitud no existe"
+            return False, errors
+
+        if request.status != "PENDING":
+            errors["status"] = "Solo se pueden eliminar solicitudes pendientes"
+            return False, errors
+
+        request.delete()
+        return True, None
+    
+    def change_status(self, new_status, admin_user):
+        errors = {}
+
+        if not admin_user.is_staff:
+            errors["permission"] = "Solo un administrador puede cambiar el estado de la solicitud"
+            return False, errors
+
+        if self.status != "PENDING":
+            errors["status"] = "La solicitud ya ha sido procesada"
+            return False, errors
+
+        self.status = new_status
+        self.approval_date = timezone.now()
+        self.save()
+        return True, None
