@@ -136,3 +136,16 @@ def categories(request):
         "app/categories.html",
         {"categories": categories, "user_is_organizer": request.user.is_organizer},
     )
+
+@login_required
+def category_delete(request, id):
+    user = request.user
+    if not user.is_organizer:
+        return redirect("categories")
+
+    if request.method == "POST":
+        category = get_object_or_404(Category, pk=id)
+        category.delete()
+        return redirect("categories")
+
+    return redirect("categories")
