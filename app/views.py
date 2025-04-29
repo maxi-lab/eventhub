@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .models import Event, User
+from .models import Category
+from django.db.models import Count
 
 
 def register(request):
@@ -124,4 +126,13 @@ def event_form(request, id=None):
         request,
         "app/event_form.html",
         {"event": event, "user_is_organizer": request.user.is_organizer},
+    )
+
+@login_required
+def categories(request):
+    categories = Category.objects.annotate(event_count=Count('events'))
+    return render(
+        request,
+        "app/categories.html",
+        {"categories": categories, "user_is_organizer": request.user.is_organizer},
     )
