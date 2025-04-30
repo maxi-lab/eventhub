@@ -215,7 +215,7 @@ class RefundRequest(models.Model):
     def change_status(self, new_status, admin_user):
         errors = {}
 
-        if not admin_user.is_staff:
+        if not admin_user.is_organizer:
             errors["permission"] = "Solo un administrador puede cambiar el estado de la solicitud"
             return False, errors
 
