@@ -12,7 +12,7 @@
                     class="btn btn-outline-primary me-2"
                 >
                     <i class="bi bi-pencil me-1"></i>Editar
-                </a>
+                </a>-
             {% endif %}
         </div>
     </div>
@@ -51,30 +51,31 @@
         <div class="row">
             <div class="card-body">
                 {% if user_comments %}
-                    {% for user_comment in user_comments %}
+                    {% for user_comment in user_comments %}                
                         <div class="comment" id="comment-{{ user_comment.id }}">
-                            <div class="d-flex justify-content-between align-items-center"
-                            <h>Tú</h>
+                            <div class="d-flex justify-content-between align-items-center">
+                            <h><b>Tú</b></h>
                             <div style= "position: relative;">
                                 <button class="menu_button" style="background: lightgray; border: none; cursor: pointer;">&#8942;</button>
-                                <div class="menu-options" style= "display: none; position: absolute; rigth: 0; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                                <div class="menu-options" style= "display: none; position: absolute;right   : 0; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
                                     <a href="javascript:void(0);" onclick="editComment({{ user_comment.id }})" style="display: block; padding: 5px 10px; text-decoration: none; color: black;">Editar</a>
-                                    <a style="display: block; padding: 5px 10px; text-decoration: none; color: red;">Eliminar</a>
+                                    <a href="#" onclick="openModal('{% url 'delete_comment' user_comment.id %}')" style="display: block; padding: 5px 10px; text-decoration: none; color: red;">Eliminar</a>                                </div>
                                 </div>
                             </div>
-                            </div>
-                            <p>{{user_comment.created_at}}</p>
+                            <p style="font-size: 10px">{{user_comment.created_at}}</p>
                             <div class="comment-view">
-                                <h>{{user_comment.title}}</h>
+                                <h><b>{{user_comment.title}}</b></h>
                                 <P>{{user_comment.text}}</p>
                             </div>
                             <div class="comment-edit" style="display: none;">
                                 <form action="{% url 'edit_comment' user_comment.id %}" method="POST" style="display: flex; flex-direction: column; gap: 10px;">
                                     {% csrf_token %}
-                                    <input type="text" name="title" value="{{ user_comment.title }}" maxlength="50">
-                                    <textarea name="text" maxlength="300" rows="5">{{ user_comment.text }}</textarea>
-                                    <button type="submit" class="btn btn-success btn-sm">Guardar</button>
-                                    <button type="button" onclick="cancelEdit({{ user_comment.id }})" class="btn btn-secondary btn-sm">Cancelar</button>
+                                    <input type="text" name="title" placeholder="{{ user_comment.title }}" value="{{ user_comment.title }}" maxlength="50">
+                                    <textarea name="text" maxlength="300" rows="5" placeholder="{{ user_comment.text }}">{{ user_comment.text }}</textarea>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button type="submit" style="background-color: #0a6efa; width: 20%; color: white; border: none; padding: 5px 10px; border-radius: 5px;">Guardar</button>
+                                        <button type="button" onclick="cancelEdit({{ user_comment.id }})" style="background-color: red; width: 20%; color: white; border: none; padding: 5px 10px; border-radius: 5px;">Cancelar</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -85,9 +86,9 @@
                 {% if other_comments %}
                     {% for other_comment in other_comments %}
                         <div class="comment">
-                            <h>{{other_comment.user.username}}</h>
-                            <p>{{other_comment.created_at}}</p>
-                            <h>{{other_comment.title}}</h>
+                            <h><b>{{other_comment.user.username}}</b></h>
+                            <p style="font-size: 10px">{{other_comment.created_at}}</p>
+                            <h><b>{{other_comment.title}}</b></h>
                             <P>{{other_comment.text}}</p>
                         </div>
                         <hr>
@@ -97,24 +98,83 @@
                     <h>No hay comentarios</h>
                     <hr>
                 {% endif %}
-                <form action="{% url 'save_comment' event.id %}" method="POST" style="display: flex; flex-direction: column;">
+                <form action="{% url 'save_comment' event.id %}" method="POST" style="display: flex; flex-direction: column;" id="comment-form">
                     {% csrf_token %}
-                    <label>Título del comentario *</label>
-                    <textarea name="title" placeholder="Escribe un título para tu comentario..." maxlength="50" rows="1"></textarea>
-                    <label>Contenido del comentario *</label>
-                    <textarea name="text" placeholder="Escribe tu comentario aquí..." maxlength="300" rows="5"></textarea>
+                    <label style="padding-top: 5px; padding-bottom: 3px;"><b>Título del comentario *</b></label>
+                    <input type="text" name="title" placeholder="Escribe un título para tu comentario..." maxlength="50" rows="1" style="padding: 5px" id="comment-title"></input>
+                    <label style="padding-top: 5px; padding-bottom: 3px;"><b>Contenido del comentario *</b></label>
+                    <textarea name="text" id="comment-text" placeholder="Escribe tu comentario aquí..." maxlength="300" rows="4" style="padding: 5px; margin-bottom: 12px"></textarea>
                     <button id="publish_button" style="background-color: #0a6efa; width: 14%; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Publicar comentario</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+<div id="deleteModal" style="display: none;">
+    <div class="modal-content">
+        <h2>¿Está seguro que desea eliminar el comentario?</h2>
+        <form id="deleteForm" style="display= none;"  method="POST">
+            {% csrf_token %}
+            <button onclick="submitForm()" style="background-color: red; border: none; color: white; padding: 5px 10px; border-radius: 5px;">Eliminar</button>
+            <button onclick="closeModal()" style="background-color: #0a6efa; color: white; border: none; padding: 5px 10px; border-radius: 5px;" type= "button">Cancelar</button>
+        </form>
+    </div>
+</div>    
+
 <script>
     document.querySelectorAll('.menu_button').forEach(button => {
         button.addEventListener('click', function(e){
             e.stopPropagation();
             const menu = this.nextElementSibling;
             menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+
+    document.addEventListener('click', function (event) {
+        document.querySelectorAll('.menu-options').forEach(menu => {
+            if (!menu.contains(event.target) && !menu.previousElementSibling.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    });
+
+   document.addEventListener('DOMContentLoaded', function (){
+        const textarea = document.getElementById("comment-text")
+        const form = document.getElementById("comment-form")
+        if (textarea && form){
+            textarea.addEventListener('keydown', function(e){
+                if (e.key === "Enter" && !e.shiftKey){
+                    e.preventDefault();
+                    form.submit()
+                }
+            });
+        }
+   });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('comment-form');
+        const title = document.getElementById('comment-title');
+        const text = document.getElementById('comment-text');
+
+        form.addEventListener('submit', function(e) {
+            if (!title.value.trim() || !text.value.trim()) {
+                e.preventDefault();
+                alert("El título y el comentario no pueden estar vacíos.");
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.comment-edit textarea').forEach(textarea => {
+            textarea.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            });
         });
     });
 
@@ -131,6 +191,55 @@
         viewDiv.style.display = 'block';
         editDiv.style.display = 'none';
     }
+
+    function openModal(deleteUrl) {
+        const modal = document.getElementById('deleteModal');
+        const form = document.getElementById('deleteForm');
+        form.action = deleteUrl;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function submitForm() {
+        document.getElementById('comment-delete').submit();
+    }
 </script>
+
+<style>
+    #deleteModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 300px;
+        max-width: 90%;
+        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
 
 {% endblock %}

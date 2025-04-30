@@ -80,6 +80,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="published_comments")
+    isDeleted = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.title} by {self.user.username}"
@@ -116,3 +117,8 @@ class Comment(models.Model):
         self.title = title or self.title
         self.text = text or self.text
         self.save()
+    
+    def delete(self):
+        self.isDeleted = True
+        self.save()
+    
