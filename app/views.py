@@ -141,7 +141,19 @@ def event_form(request, id=None):
 
 def tickets(request):
     user=request.user
-    tickets = Ticket.objects.filter(is_deleted=False,user=user).order_by("buy_date")
+    
+    if user.is_organizer:
+        events = Event.objects.filter(organizer=user).order_by("scheduled_at")
+        tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
+        print(tickets)
+        for t in tickets:
+            if t.event not in events:
+                tickets=tickets.exclude(pk=t.pk)
+                
+    else:
+        tickets = Ticket.objects.filter(is_deleted=False,user=user).order_by("buy_date")
+
+    
     tipo=Ticket.TICKET_TYPES
     return render(request, "app/tickets.html", {"tickets": tickets, "tipo": tipo})
 
