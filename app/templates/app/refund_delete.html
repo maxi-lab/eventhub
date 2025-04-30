@@ -1,44 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-5">
-    <h3>Editar Solicitud de Reembolso</h3>
+    <h2>Eliminar Solicitud de Reembolso</h2>
     <div class="card mt-4">
-        <div class="card-body">
-            <form method="POST">
-                {% csrf_token %}
+        <div class="card-body text-center">
+            <div class="text-danger mb-3" style="font-size: 3rem;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <p class="fs-5">¿Estás seguro que querés eliminar esta solicitud?</p>
+            <p class="text-muted">Esta acción no se puede deshacer.</p>
 
-                <div class="mb-3">
-                    <label class="form-label">Código de Entrada</label>
-                    <input type="text" class="form-control" value="{{ refund.ticket.code }}" disabled>
+            {% if errors %}
+                <div class="alert alert-danger text-start">
+                    {% for error in errors.values %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
                 </div>
+            {% endif %}
 
-                <div class="mb-3">
-                    <label class="form-label">Motivo del Reembolso</label>
-                    <textarea class="form-control" rows="3" disabled>{{ refund.reason }}</textarea>
-                </div>
-
-                <div class="form-check mb-4">
-                    <input class="form-check-input" type="checkbox" checked disabled>
-                    <label class="form-check-label">
-                        Entiendo y acepto la <a href="{% url 'terms_policy' %}" target="_blank">política de reembolsos</a>.
-                    </label>
-                </div>
-
-                {% if errors %}
-                    <div class="alert alert-danger">
-                        {% for error in errors %}
-                            <div>{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'my_refund_requests' %}" class="btn btn-secondary">Cancelar</a>
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a href="{% url 'my_refund_requests' %}" class="btn btn-outline-secondary">Cancelar</a>
+                <form method="POST">
+                    {% csrf_token %}
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Eliminar Solicitud
+                        <i class="bi bi-trash"></i> Eliminar
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>

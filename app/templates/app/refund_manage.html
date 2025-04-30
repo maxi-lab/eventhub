@@ -35,27 +35,37 @@
                         <span class="badge bg-danger">Rechazado</span>
                     {% endif %}
                 </td>
-                <td class="d-flex gap-1">
-                    <a href="{% url 'refund_request_detail' refund.id %}" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
-                        <i class="bi bi-eye"></i>
-                    </a>
-                    <form method="POST" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="request_id" value="{{ refund.id }}">
-                        <input type="hidden" name="new_status" value="APPROVED">
-                        <button type="submit" class="btn btn-sm btn-outline-success" title="Aprobar">
-                            <i class="bi bi-check"></i>
-                        </button>
-                    </form>
-                    <form method="POST" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="request_id" value="{{ refund.id }}">
-                        <input type="hidden" name="new_status" value="DENIED">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Rechazar">
-                            <i class="bi bi-x"></i>
-                        </button>
-                    </form>
-                </td>
+                        <td class="d-flex gap-1">
+            <a href="{% url 'refund_request_detail' refund.id %}" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
+                <i class="bi bi-eye"></i>
+            </a>
+
+            {% if refund.status == 'PENDING' %}
+                <form method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="request_id" value="{{ refund.id }}">
+                    <input type="hidden" name="new_status" value="APPROVED">
+                    <button type="submit" class="btn btn-sm btn-outline-success" title="Aprobar">
+                        <i class="bi bi-check"></i>
+                    </button>
+                </form>
+                <form method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="request_id" value="{{ refund.id }}">
+                    <input type="hidden" name="new_status" value="DENIED">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Rechazar">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </form>
+            {% else %}
+                <button class="btn btn-sm btn-secondary" disabled title="No disponible">
+                    <i class="bi bi-check"></i>
+                </button>
+                <button class="btn btn-sm btn-secondary" disabled title="No disponible">
+                    <i class="bi bi-x"></i>
+                </button>
+            {% endif %}
+        </td>
             </tr>
             {% endfor %}
         </tbody>
