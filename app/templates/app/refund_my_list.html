@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Solicitudes de Reembolso{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Solicitudes de Reembolso</h1>
+        <div class="d-flex gap-2">
+            <a href="{% url 'create_refund_request' %}" class="btn btn-primary">Nueva solicitud</a>
+            {% if user.is_organizer %}
+                <a href="{% url 'manage_refund_requests' %}" class="btn btn-outline-primary">Gestionar solicitudes</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if refund_requests %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Código de Entrada</th>
+                <th>Evento</th>
+                <th>Fecha</th>
+                <th>Motivo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for refund in refund_requests %}
+            <tr>
+                <td>{{ refund.ticket.code }}</td>
+                <td>{{ refund.ticket.event.title }}</td>
+                <td>{{ refund.created_at|date:"d b Y, H:i" }}</td>
+                <td>{{ refund.reason }}</td>
+                <td>
+                    {% if refund.status == 'PENDING' %}
+                        <span class="badge bg-warning text-dark">Pendiente</span>
+                    {% elif refund.status == 'APPROVED' %}
+                        <span class="badge bg-success">Aprobado</span>
+                    {% elif refund.status == 'DENIED' %}
+                        <span class="badge bg-danger">Rechazado</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'refund_request_detail' refund.id %}" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </a>
+                    <a href="{% url 'edit_refund_request' refund.id %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                    <a href="{% url 'edit_refund_request' refund.id %}?delete=1" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                        <i class="bi bi-trash" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <h2>No has realizado solicitudes.</h2>
+    {% endif %}
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+{% endblock %}
