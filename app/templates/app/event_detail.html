@@ -44,11 +44,11 @@
             </div>
         </div>
     </div>
-    <div class="card">
-        <div class="row" style="background-color: lightgray; width: 100%; height: 30px; align-items: center;">
-            <h style="font-weight: bold">Comentarios ({{comments_count}})</h>
+    <div class="row">
+        <div class="card" style="background-color: lightgray; width: 100%; height: 30px; border-bottom-left-radius: 0; border-bottom-right-radius: 0; display: flex">
+            <h style="font-weight: bold; vertical-align: middle">Comentarios ({{comments_count}})</h>
         </div>
-        <div class="row">
+        <div class="card" style="border-top-left-radius: 0; border-top-right-radius: 0;">
             <div class="card-body">
                 {% if user_comments %}
                     {% for user_comment in user_comments %}                
