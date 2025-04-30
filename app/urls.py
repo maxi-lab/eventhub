@@ -20,4 +20,10 @@ urlpatterns = [
     path("tickets/<int:id>", views.ticket_detail, name="ticket_detail"),
     path("tickets/<int:id>/edit/", views.ticket_form, name="ticket_edit"),
     path("terms_policy/", views.terms_policy, name="terms_policy"),
+    path("refunds/create/", views.create_refund_request, name="create_refund_request"),
+    path("refunds/mine/", views.my_refund_requests, name="my_refund_requests"),
+    path("refunds/manage/", views.manage_refund_requests, name="manage_refund_requests"),
+    path("refunds/edit/<int:request_id>/", views.edit_refund_request, name="edit_refund_request"),
+    path("refunds/delete/<int:request_id>/", views.delete_refund_request, name="delete_refund_request"),
+    path("refunds/<int:request_id>/", views.refund_request_detail, name="refund_request_detail"),
 ]

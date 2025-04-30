@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <h3>Solicitar Reembolso</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-header bg-light">
+                <strong>Formulario de Solicitud</strong>
+                <div class="alert alert-info mt-2">
+                    Puedes solicitar un reembolso hasta 48 horas antes del evento. Una vez procesada la solicitud, el reembolso se realizará en un plazo de 7 a 14 días hábiles.
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="ticket_code" class="form-label">Código de ticket</label>
+                    <input type="text" class="form-control" name="ticket_code" required value="{{ ticket_code }}">
+                </div>
+                <div class="mb-3">
+                    <label for="reason" class="form-label">Motivo del reembolso *</label>
+                    <input type="text" class="form-control" name="reason" required value="{{ reason }}">
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" required>
+                    <label class="form-check-label">
+                        Entiendo y acepto la <a href="{% url 'terms_policy' %}" target="_blank">política de reembolsos</a>.
+                    </label>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

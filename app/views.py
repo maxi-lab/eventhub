@@ -1,12 +1,16 @@
 import datetime
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.http import HttpResponseServerError
-
+from .models import RefundRequest
 from .models import Event, User, Ticket
+from django.http import HttpResponseForbidden
 
+
+def is_admin(user):
+    return user.is_organizer
 
 def register(request):
     if request.method == "POST":
@@ -191,3 +195,84 @@ def verify_card(number, expiration_date, cvv,):
     return errors
 def terms_policy(request):
     return render(request, "app/terms.html", {})
+
+
+@login_required
+def create_refund_request(request):
+    if request.method == "POST":
+        ticket_code = request.POST.get("ticket_code")
+        reason = request.POST.get("reason")
+
+        success, errors = RefundRequest.create_request(request.user, ticket_code, reason)
+        if success:
+            return redirect("my_refund_requests")
+        return render(request, "app/refund_create.html", {"errors": errors, "ticket_code": ticket_code, "reason": reason})
+
+    return render(request, "app/refund_create.html")
+
+
+@login_required
+def my_refund_requests(request):
+    requests = RefundRequest.objects.filter(ticket__user=request.user).order_by("-created_at")
+    return render(request, "app/refund_my_list.html", {"refund_requests": requests})
+
+
+@login_required
+def edit_refund_request(request, request_id):
+    refund = get_object_or_404(RefundRequest, id=request_id)
+
+    if refund.ticket.user != request.user:
+        return HttpResponseForbidden("No tienes permiso para editar esta solicitud.")
+
+    if request.method == "POST":
+        new_reason = request.POST.get("reason")
+        success, errors = RefundRequest.edit_request(request.user, request_id, new_reason)
+        if success:
+            return redirect("my_refund_requests")
+        return render(request, "app/refund_edit.html", {"refund": refund, "errors": errors})
+
+    return render(request, "app/refund_edit.html", {"refund": refund})
+
+
+@login_required
+def delete_refund_request(request, request_id):
+    refund = get_object_or_404(RefundRequest, id=request_id)
+
+    if refund.ticket.user != request.user:
+        return HttpResponseForbidden("No tienes permiso para eliminar esta solicitud.")
+
+    if request.method == "POST":
+        success, errors = RefundRequest.delete_request(request.user, request_id)
+        if success:
+            return redirect("my_refund_requests")
+        return render(request, "app/refund_delete.html", {"refund": refund, "errors": errors})
+
+    return render(request, "app/refund_delete.html", {"refund": refund})
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/events', redirect_field_name=None)
+def manage_refund_requests(request):
+    refunds = RefundRequest.objects.all().order_by("-created_at")
+
+    if request.method == "POST":
+        request_id = request.POST.get("request_id")
+        new_status = request.POST.get("new_status")
+        refund = get_object_or_404(RefundRequest, id=request_id)
+
+        success, errors = refund.change_status(new_status, request.user)
+        if not success:
+            return render(request, "app/refund_manage.html", {"refund_requests": refunds, "errors": errors})
+
+        return redirect("manage_refund_requests")
+
+    return render(request, "app/refund_manage.html", {"refund_requests": refunds})
+
+@login_required
+def refund_request_detail(request, request_id):
+    refund = get_object_or_404(RefundRequest, id=request_id)
+    
+    if refund.ticket.user != request.user and not request.user.is_organizer:
+        return HttpResponseForbidden("No tenés permiso para ver esta solicitud.")
+
+    return render(request, "app/refund_detail.html", {"refund": refund})

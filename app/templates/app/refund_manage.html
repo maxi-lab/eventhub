@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Gestionar Solicitudes de Reembolso{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Solicitudes de Reembolso</h1>
+    </div>
+
+    {% if refund_requests %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Código de Entrada</th>
+                <th>Evento</th>
+                <th>Solicitante</th>
+                <th>Fecha de Solicitud</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for refund in refund_requests %}
+            <tr>
+                <td>{{ refund.ticket.code }}</a></td>
+                <td>{{ refund.ticket.event.title }}</td>
+                <td>{{ refund.ticket.user }}</td>
+                <td>{{ refund.created_at|date:"d b Y, H:i" }}</td>
+                <td>
+                    {% if refund.status == 'PENDING' %}
+                        <span class="badge bg-warning text-dark">Pendiente</span>
+                    {% elif refund.status == 'APPROVED' %}
+                        <span class="badge bg-success">Aprobado</span>
+                    {% elif refund.status == 'DENIED' %}
+                        <span class="badge bg-danger">Rechazado</span>
+                    {% endif %}
+                </td>
+                <td class="d-flex gap-1">
+                    <a href="{% url 'refund_request_detail' refund.id %}" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <form method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="request_id" value="{{ refund.id }}">
+                        <input type="hidden" name="new_status" value="APPROVED">
+                        <button type="submit" class="btn btn-sm btn-outline-success" title="Aprobar">
+                            <i class="bi bi-check"></i>
+                        </button>
+                    </form>
+                    <form method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="request_id" value="{{ refund.id }}">
+                        <input type="hidden" name="new_status" value="DENIED">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Rechazar">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <h2>No hay solicitudes.</h2>
+    {% endif %}
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+{% endblock %}
