@@ -306,3 +306,32 @@ def create_venue(request):
         return redirect('list_venues')  # Redirige a la lista de venues
 
     return render(request, 'app/venue_form.html')
+
+@login_required
+def edit_venue(request, venue_id):
+    venue = get_object_or_404(Venue, pk=venue_id)
+
+    if request.method == 'POST':
+        venue.name = request.POST.get('name')
+        venue.address = request.POST.get('address')
+        venue.city = request.POST.get('city')
+        venue.capacity = request.POST.get('capacity')
+        venue.contact = request.POST.get('contact')
+
+        # Validación de datos
+        if not venue.name or not venue.address or not venue.city or not venue.capacity or not venue.contact:
+            return HttpResponse("Todos los campos son obligatorios", status=400)
+
+        venue.save()
+
+        return redirect('list_venues')
+
+    return render(request, 'app/venue_form.html', {'venue': venue})
+
+@login_required
+def delete_venue(request, venue_id):
+    venue = get_object_or_404(Venue, pk=venue_id)
+    
+    # Si el usuario está autorizado para eliminar el venue (opcional)
+    venue.delete()
+    return redirect('list_venues')
