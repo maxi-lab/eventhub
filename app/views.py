@@ -140,7 +140,8 @@ def event_form(request, id=None):
     )
 
 def tickets(request):
-    tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
+    user=request.user
+    tickets = Ticket.objects.filter(is_deleted=False,user=user).order_by("buy_date")
     tipo=Ticket.TICKET_TYPES
     return render(request, "app/tickets.html", {"tickets": tickets, "tipo": tipo})
 
