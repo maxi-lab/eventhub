@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.http import HttpResponseServerError
 from .models import RefundRequest
-from .models import Event, User, Ticket
-from django.http import HttpResponseForbidden
+from .models import Event, User, Ticket, Venue
+from django.http import HttpResponseForbidden, HttpResponse
 
 
 def is_admin(user):
@@ -276,3 +276,4 @@ def refund_request_detail(request, request_id):
         return HttpResponseForbidden("No tenés permiso para ver esta solicitud.")
 
     return render(request, "app/refund_detail.html", {"refund": refund})
+
