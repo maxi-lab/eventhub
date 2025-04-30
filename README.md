@@ -8,6 +8,7 @@ Aplicaci√≥n web para venta de entradas utilizada en la cursada 2025 de Ingenier√
 - Emiliano Di Grappa
 - Santiago Natalichio Bestosini
 - Lautaro Aubert
+- Augusto Checa
 ## Dependencias
 
 - python 3
