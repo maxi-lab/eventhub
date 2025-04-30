@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Venues{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Lista de Lugares</h1>
+        <a href="{% url 'create_venue' %}" class="btn btn-success mb-3">Crear Venue</a>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Ciudad</th>
+                    <th>Capacidad</th>
+                    <th>Contacto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venue in venues %}
+                    <tr>
+                        <td>{{ venue.name }}</td>
+                        <td>{{ venue.address }}</td>
+                        <td>{{ venue.city }}</td>
+                        <td>{{ venue.capacity }}</td>
+                        <td>{{ venue.contact }}</td>
+                        <td>
+                            <a href="{% url 'edit_venue' venue.id %}" class="btn btn-warning btn-sm">Editar</a>
+                            <a href="{% url 'delete_venue' venue.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -277,3 +277,32 @@ def refund_request_detail(request, request_id):
 
     return render(request, "app/refund_detail.html", {"refund": refund})
 
+@login_required
+def list_venues(request):
+    venues = Venue.objects.all()
+    return render(request, 'app/venue_list.html', {'venues': venues})
+
+@login_required
+def create_venue(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        capacity = request.POST.get('capacity')
+        contact = request.POST.get('contact')
+
+        # Validación de datos
+        if not name or not address or not city or not capacity or not contact:
+            return HttpResponse("Todos los campos son obligatorios", status=400)
+
+        venue = Venue.objects.create(
+            name=name,
+            address=address,
+            city=city,
+            capacity=capacity,
+            contact=contact
+        )
+
+        return redirect('list_venues')  # Redirige a la lista de venues
+
+    return render(request, 'app/venue_form.html')
