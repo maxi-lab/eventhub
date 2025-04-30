@@ -227,3 +227,13 @@ class RefundRequest(models.Model):
         self.approval_date = timezone.now()
         self.save()
         return True, None
+
+class Venue(models.Model):
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    capacity = models.PositiveIntegerField()
+    contact = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
