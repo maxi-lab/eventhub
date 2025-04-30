@@ -245,9 +245,9 @@ def delete_refund_request(request, request_id):
         success, errors = RefundRequest.delete_request(request.user, request_id)
         if success:
             return redirect("my_refund_requests")
-        return render(request, "app/delete.html", {"refund": refund, "errors": errors})
+        return render(request, "app/refund_delete.html", {"refund": refund, "errors": errors})
 
-    return render(request, "app/delete.html", {"refund": refund})
+    return render(request, "app/refund_delete.html", {"refund": refund})
 
 
 @login_required
