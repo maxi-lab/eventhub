@@ -251,7 +251,7 @@ def delete_refund_request(request, request_id):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='/events', redirect_field_name=None)
 def manage_refund_requests(request):
     refunds = RefundRequest.objects.all().order_by("-created_at")
 
