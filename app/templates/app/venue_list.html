@@ -4,8 +4,14 @@
 
 {% block content %}
     <div class="container">
-        <h1>Lista de Lugares</h1>
-        <a href="{% url 'create_venue' %}" class="btn btn-success mb-3">Crear Venue</a>
+        <h1>Lista de Venues</h1>
+
+        <!-- Botón de "Crear Venue" en la parte superior derecha -->
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'create_venue' %}" class="btn btn-success">Crear Venue</a>
+        </div>
+
+        <!-- Tabla de venues -->
         <table class="table">
             <thead>
                 <tr>
@@ -26,8 +32,9 @@
                         <td>{{ venue.capacity }}</td>
                         <td>{{ venue.contact }}</td>
                         <td>
-                            <a href="{% url 'edit_venue' venue.id %}" class="btn btn-warning btn-sm">Editar</a>
-                            <a href="{% url 'delete_venue' venue.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                            <!-- Aquí puedes agregar botones para editar, eliminar, etc. -->
+                            <a href="{% url 'edit_venue' venue.id %}" class="btn btn-primary">Editar</a>
+                            <a href="{% url 'delete_venue' venue.id %}" class="btn btn-danger">Eliminar</a>
                         </td>
                     </tr>
                 {% endfor %}
