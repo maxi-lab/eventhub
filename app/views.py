@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .models import Event, User
+from .models import Event, User, UserNotification, Notification
 
 
 def register(request):
@@ -127,8 +127,22 @@ def event_form(request, id=None):
     )
 
 @login_required
+def mark_notification_read(request, pk):
+    notif = get_object_or_404(UserNotification, pk=pk, user=request.user)
+    notif.is_read = True
+    notif.save()
+    return redirect('notifications:list')
+
+@login_required
 def notificationsUser(request):
-    return render(request, "notifications/notificationsUser.html")
+    user_notifications = UserNotification.objects.filter(user=request.user).select_related('notification').order_by('-notification__created_at')
+
+    new_count = user_notifications.filter(is_read=False).count()/
+
+    return render(request, 'notifications/notificationsUser.html', {
+        'user_notifications': user_notifications,
+        'new_count': new_count,
+    })
 
 @login_required
 def notificationsOrganizer(request):
@@ -141,6 +155,7 @@ def notificationsCreate(request):
         message = request.POST.get('message')
         user_id = request.POST.get('user')
         priority = request.POST.get('priority')
+        event_id = request.POST.get('event')
 
         priority_map = {
             'baja': 'LOW',
@@ -159,7 +174,8 @@ def notificationsCreate(request):
             user = User.objects.get(id=user_id)
             UserNotification.objects.create(
                 user=user,
-                notification=notification
+                notification=notification,
+                is_read=False
             )
 
         # return redirect('')
