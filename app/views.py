@@ -169,10 +169,15 @@ def ticket_form(request,id=None):
         event_id=request.POST.get("event_id")
         quantity=int(request.POST.get("quantity"))
         if quantity < 1:
-            return HttpResponseServerError("Error 500.La cantidad de tickets debe ser mayor a 0")
-        if len(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))!=0:
-            print(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
-            return HttpResponseServerError(verify_card(request.POST.get("number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
+            return render(request,'app/ticket_form.html',{"events":events,"ticket":ticket,"error":"La cantidad de tickets debe ser mayor a 0"})
+        card=verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv"))
+        if len(card)!=0:
+            
+            e=''
+            for i in card:
+                e=e+' '+card[i]
+            
+            return render(request,'app/ticket_form.html',{"events":events,"ticket":ticket,"error":e})
         
         event=get_object_or_404(Event, pk=event_id)
         if id is None:
