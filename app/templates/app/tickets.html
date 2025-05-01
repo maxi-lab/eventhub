@@ -7,7 +7,13 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Tickets</h1>
-        <a href="{% url 'ticket_form' %}" class="btn btn-primary" >Comprar Ticket</a>    
+        <a href="{% url 'ticket_form' %}" class="btn btn-primary" >
+        {% if user.is_organizer %}
+            Vender Ticket
+        {% else %}
+            Comprar Ticket
+        {% endif %}
+        </a>    
     </div>
     {% if tickets %}
         <table class="table">
