@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <h1>Entradas para {{ event.title }}</h1>
+    <div class="row">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            
+            {% for ticket in tickets %}
+                {% if not ticket.is_deleted %}
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Cliente: {{ ticket.user.username }}</h5>
+                            <p class="card-text">Precio: {% if ticket.type_ticket == 'GRL' %}
+                                General
+                            {% elif ticket.type_ticket == 'VIP' %}
+                                VIP
+                            {% endif %}
+                            </p>
+                            <p class="card-text">Cantidad: {{ ticket.quantity }}</p>
+                            <p class="card-text">Fecha de compra: {{ ticket.buy_date|date:"d b Y, H:i" }}</p>
+                            <form action="{% url 'ticket_delete' ticket.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                            
+
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+</div>
+
+{% endblock %}

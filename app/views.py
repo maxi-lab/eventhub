@@ -1,11 +1,17 @@
 import datetime
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.http import HttpResponseServerError
+from .models import RefundRequest
+from .models import Event, User, Ticket
+from django.http import HttpResponseForbidden
 
 from .models import Event, User, UserNotification, Notification
 
+def is_admin(user):
+    return user.is_organizer
 
 def register(request):
     if request.method == "POST":
@@ -71,7 +77,7 @@ def events(request):
 @login_required
 def event_detail(request, id):
     event = get_object_or_404(Event, pk=id)
-    return render(request, "app/event_detail.html", {"event": event})
+    return render(request, "app/event_detail.html", {"event": event, "user_is_organizer": request.user.is_organizer})
 
 
 @login_required
@@ -87,6 +93,14 @@ def event_delete(request, id):
 
     return redirect("events")
 
+def event_tickets(request,id):
+    if not request.user.is_organizer:
+        return redirect("events")
+    event = get_object_or_404(Event, pk=id)
+    tickets = Ticket.objects.filter(event=event,is_deleted=False).order_by("buy_date")
+    for ticket in tickets:
+        print(ticket.is_deleted)
+    return render(request, "app/event_tickets.html", {"event": event, "tickets": tickets})
 
 @login_required
 def event_form(request, id=None):
@@ -137,7 +151,7 @@ def mark_notification_read(request, pk):
 def notificationsUser(request):
     user_notifications = UserNotification.objects.filter(user=request.user).select_related('notification').order_by('-notification__created_at')
 
-    new_count = user_notifications.filter(is_read=False).count()/
+    new_count = user_notifications.filter(is_read=False).count()
 
     return render(request, 'notifications/notificationsUser.html', {
         'user_notifications': user_notifications,
@@ -183,3 +197,140 @@ def notificationsCreate(request):
     events = Event.objects.all()
     users = User.objects.all()
     return render(request, 'notifications/notificationsCreate.html', {'events': events, 'users': users})
+def tickets(request):
+    tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
+    tipo=Ticket.TICKET_TYPES
+    return render(request, "app/tickets.html", {"tickets": tickets, "tipo": tipo})
+
+def ticket_form(request,id=None):
+    ticket = {}
+    events = Event.objects.all()
+    user=request.user
+    if id is not None:
+        ticket=get_object_or_404(Ticket, pk=id)
+    if request.method == "POST":
+        print(request.POST)
+        tipo_ticket=request.POST.get("type_ticket")
+        event_id=request.POST.get("event_id")
+        quantity=int(request.POST.get("quantity"))
+        if quantity < 1:
+            return HttpResponseServerError("Error 500.La cantidad de tickets debe ser mayor a 0")
+        if len(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))!=0:
+            print(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
+            return HttpResponseServerError(verify_card(request.POST.get("number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
+        
+        event=get_object_or_404(Event, pk=event_id)
+        if id is None:
+            print("Creando nuevo ticket")
+            Ticket.new(tipo_ticket,event,user,quantity)
+            return redirect("tickets")
+        Ticket.update_ticket(id, tipo_ticket, event,quantity=quantity)
+        return redirect("tickets")
+    return render(request, "app/ticket_form.html", {"events":events,"ticket":ticket})
+def ticket_delete(request, id):
+    if request.method == "POST":
+        Ticket.delete_ticket(id)
+        return redirect("tickets")
+    return redirect("tickets")
+def ticket_detail(request, id):
+    ticket = get_object_or_404(Ticket, pk=id)
+    tipos=Ticket.TICKET_TYPES
+    return render(request, "app/ticket_detail.html", {"ticket": ticket,"tipos":tipos})
+
+def verify_card(number, expiration_date, cvv,):
+    errors={}
+    if number is None or expiration_date is None or cvv is None:
+        errors["number"] = "El número de tarjeta no puede ser nulo"
+        errors["expiration_date"] = "La fecha de expiración no puede ser nula"
+        errors["cvv"] = "El CVV no puede ser nulo"
+        return errors
+    if len(number) != 16 or number.isdigit() == False:
+        errors["number"] = "El número de tarjeta debe tener 16 dígitos"
+    if len(cvv) != 3:
+        errors["cvv"] = "El CVV debe tener 3 dígitos"
+    if len(expiration_date) != 5:
+        errors["expiration_date"] = "La fecha de expiración debe tener el formato MM/AA"
+    return errors
+def terms_policy(request):
+    return render(request, "app/terms.html", {})
+
+
+@login_required
+def create_refund_request(request):
+    if request.method == "POST":
+        ticket_code = request.POST.get("ticket_code")
+        reason = request.POST.get("reason")
+
+        success, errors = RefundRequest.create_request(request.user, ticket_code, reason)
+        if success:
+            return redirect("my_refund_requests")
+        return render(request, "app/refund_create.html", {"errors": errors, "ticket_code": ticket_code, "reason": reason})
+
+    return render(request, "app/refund_create.html")
+
+
+@login_required
+def my_refund_requests(request):
+    requests = RefundRequest.objects.filter(ticket__user=request.user).order_by("-created_at")
+    return render(request, "app/refund_my_list.html", {"refund_requests": requests})
+
+
+@login_required
+def edit_refund_request(request, request_id):
+    refund = get_object_or_404(RefundRequest, id=request_id)
+
+    if refund.ticket.user != request.user:
+        return HttpResponseForbidden("No tienes permiso para editar esta solicitud.")
+
+    if request.method == "POST":
+        new_reason = request.POST.get("reason")
+        success, errors = RefundRequest.edit_request(request.user, request_id, new_reason)
+        if success:
+            return redirect("my_refund_requests")
+        return render(request, "app/refund_edit.html", {"refund": refund, "errors": errors})
+
+    return render(request, "app/refund_edit.html", {"refund": refund})
+
+
+@login_required
+def delete_refund_request(request, request_id):
+    refund = get_object_or_404(RefundRequest, id=request_id)
+
+    if refund.ticket.user != request.user:
+        return HttpResponseForbidden("No tienes permiso para eliminar esta solicitud.")
+
+    if request.method == "POST":
+        success, errors = RefundRequest.delete_request(request.user, request_id)
+        if success:
+            return redirect("my_refund_requests")
+        return render(request, "app/refund_delete.html", {"refund": refund, "errors": errors})
+
+    return render(request, "app/refund_delete.html", {"refund": refund})
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/events', redirect_field_name=None)
+def manage_refund_requests(request):
+    refunds = RefundRequest.objects.all().order_by("-created_at")
+
+    if request.method == "POST":
+        request_id = request.POST.get("request_id")
+        new_status = request.POST.get("new_status")
+        refund = get_object_or_404(RefundRequest, id=request_id)
+
+        success, errors = refund.change_status(new_status, request.user)
+        if not success:
+            return render(request, "app/refund_manage.html", {"refund_requests": refunds, "errors": errors})
+
+        return redirect("manage_refund_requests")
+
+    return render(request, "app/refund_manage.html", {"refund_requests": refunds})
+
+@login_required
+def refund_request_detail(request, request_id):
+    refund = get_object_or_404(RefundRequest, id=request_id)
+    
+    if refund.ticket.user != request.user and not request.user.is_organizer:
+        return HttpResponseForbidden("No tenés permiso para ver esta solicitud.")
+
+    return render(request, "app/refund_detail.html", {"refund": refund})

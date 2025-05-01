@@ -39,6 +39,11 @@
                             <h6 class="mb-0">Organizador</h6>
                             <p class="mb-0">{{ event.organizer }}</p>
                         </div>
+                        {% if user_is_organizer %}
+                            <div class="ms-auto">
+                                <a href="{% url 'event_tickets' event.id %}" class="btn btn-outline-secondary">Entradas</a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

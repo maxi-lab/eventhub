@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Tickets{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Tickets</h1>
+        <a href="{% url 'ticket_form' %}" class="btn btn-primary" >Comprar Ticket</a>    
+    </div>
+    {% if tickets %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha de compra</th>
+                    <th>Tipo de ticket</th>
+                    <th>Evento</th>
+                    <th>Cantidad</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ticket in tickets %}
+                <tr>
+                <td>{{ ticket.buy_date|date:"d b Y, H:i" }}</td>
+                <td>
+                    {% if ticket.type_ticket == 'GRL' %}
+                        General
+                    {% elif ticket.type_ticket == 'VIP' %}
+                        VIP
+                    {% endif %}
+                </td>
+                <td>{{ ticket.event.title }}</td>
+                <td>{{ ticket.quantity }}</td>
+                <td>
+                    <form action="{% url 'ticket_delete' ticket.id %}" method="POST" class="d-inline-block">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash" aria-hidden="true"></i></button>
+                    </form>
+                        <a href="{% url 'ticket_detail' ticket.id %}"><button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye" aria-hidden="true"></i></button></a>
+                        <a href="{% url 'ticket_edit' ticket.id %}"><button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil" aria-hidden="true"></i></button></a>
+                    </tr>
+                    {% endfor %}
+        </tbody>
+            {% endif %}
+    {% if not tickets %}
+        <h2>No hay tickets existentes</h2>
+    {% endif %}
+</div>
+{% endblock %}

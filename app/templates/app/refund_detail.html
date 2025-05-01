@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Solicitud de Reembolso</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Detalles de la Solicitud</h5>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-light rounded-circle p-2 me-3">
+                        <i class="bi bi-upc-scan text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">Código del Ticket</h6>
+                        <p class="mb-0">{{ refund.ticket.code }}</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-light rounded-circle p-2 me-3">
+                        <i class="bi bi-calendar-event text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">Evento</h6>
+                        <p class="mb-0">{{ refund.ticket.event.title }}</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-light rounded-circle p-2 me-3">
+                        <i class="bi bi-person text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">Usuario</h6>
+                        <p class="mb-0">{{ refund.ticket.user.username }}</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-light rounded-circle p-2 me-3">
+                        <i class="bi bi-clock text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">Fecha de Solicitud</h6>
+                        <p class="mb-0">{{ refund.created_at|date:"d M Y, H:i" }}</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-light rounded-circle p-2 me-3">
+                        <i class="bi bi-chat-left-text text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">Motivo</h6>
+                        <p class="mb-0">{{ refund.reason }}</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <div class="bg-light rounded-circle p-2 me-3">
+                        <i class="bi bi-info-circle text-primary"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">Estado</h6>
+                        <p class="mb-0">
+                            {% if refund.status == 'PENDING' %}
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                            {% elif refund.status == 'APPROVED' %}
+                                <span class="badge bg-success">Aprobado</span>
+                            {% elif refund.status == 'DENIED' %}
+                                <span class="badge bg-danger">Rechazado</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
