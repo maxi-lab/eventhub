@@ -140,7 +140,20 @@ def event_form(request, id=None):
     )
 
 def tickets(request):
-    tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
+    user=request.user
+    
+    if user.is_organizer:
+        events = Event.objects.filter(organizer=user).order_by("scheduled_at")
+        tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
+        print(tickets)
+        for t in tickets:
+            if t.event not in events:
+                tickets=tickets.exclude(pk=t.pk)
+                
+    else:
+        tickets = Ticket.objects.filter(is_deleted=False,user=user).order_by("buy_date")
+
+    
     tipo=Ticket.TICKET_TYPES
     return render(request, "app/tickets.html", {"tickets": tickets, "tipo": tipo})
 
@@ -156,10 +169,15 @@ def ticket_form(request,id=None):
         event_id=request.POST.get("event_id")
         quantity=int(request.POST.get("quantity"))
         if quantity < 1:
-            return HttpResponseServerError("Error 500.La cantidad de tickets debe ser mayor a 0")
-        if len(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))!=0:
-            print(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
-            return HttpResponseServerError(verify_card(request.POST.get("number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
+            return render(request,'app/ticket_form.html',{"events":events,"ticket":ticket,"error":"La cantidad de tickets debe ser mayor a 0"})
+        card=verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv"))
+        if len(card)!=0:
+            
+            e=''
+            for i in card:
+                e=e+' '+card[i]
+            
+            return render(request,'app/ticket_form.html',{"events":events,"ticket":ticket,"error":e})
         
         event=get_object_or_404(Event, pk=event_id)
         if id is None:
