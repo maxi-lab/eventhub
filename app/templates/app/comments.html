@@ -6,7 +6,7 @@
 <div style="margin: 5%">
     {% if admin_comments %}
     <table style="width: 100%">
-        <tr>
+        <tr style="background-color: lightgray">
             <th style="width: 20%">Evento</th>
             <th style="width: 20%">Usuario</th>
             <th style="width: 35%">Comentario</th>
@@ -14,17 +14,29 @@
             <th style="width: 10%">Acciones</th>
         </tr>
         {% for comment in admin_comments %}
-        <tr>
-            <td><a href="{% url 'event_detail' comment.event.id %}">{{ comment.event.title }}</a></td>
+        <tr style="border-bottom: 1px solid lightgray">
+            <td><a href="{% url 'event_detail' comment.event.id %}" style="text-decoration: none">{{ comment.event.title }}</a></td>
             <td>{{ comment.user.username }}</td>
             <td>{{ comment.title }}</td>
             <td>{{ comment.created_at }}</td>
-            <td><button onclick="javascript:viewComment(this, '{% url 'admin_delete_comment' comment.id %}');"
-                data-username="{{ comment.user.username }}"
-                data-created="{{ comment.created_at }} "
-                data-title="{{ comment.title }}"
-                data-text="{{ comment.text|escapejs }}"><i class="bi bi-eye" aria-hidden="true" style="color: lightblue;"></i></button>
-                <button onclick="javascript:deleteComment('{% url 'admin_delete_comment' comment.id %}')"><i class="bi bi-trash" aria-hidden="true" style="color: red;"></i></button></td>
+            <td style="display: inline-flex; border: none;"
+            border-radius: 6px;
+            overflow: hidden;>
+            <div style="display: inline-flex; border: 1px solid #ddd;border-radius: 6px;overflow: hidden;">
+                <div class="hstack gap-1">
+                    <a href="#" onclick="javascript:viewComment(this, '{% url 'admin_delete_comment' comment.id %}');"
+                       class="btn btn-sm btn-outline-primary"
+                       aria-label="Ver comentario"
+                       data-username="{{ comment.user.username }}"
+                       data-created="{{ comment.created_at }} "
+                       data-title="{{ comment.title }}"
+                       data-text="{{ comment.text|escapejs }}">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </a>
+                <button class="btn btn-sm btn-outline-danger" onclick="javascript:deleteComment('{% url 'admin_delete_comment' comment.id %}')">
+                    <i class="bi bi-trash" aria-hidden="true" style="color: red;"></i>
+                </button></td>
+            </div>
         </tr>
         {% endfor %}
     </table>
@@ -32,7 +44,7 @@
         <div class="d-flex justify-content-between align-items-center">
             <h id="show_username" style="font-weight: bold"></h>
             <div style= "position: relative;">
-                <button onclick="openModal()"><i class="bi bi-trash" aria-hidden="true" style="color: red;"></i></button></td>
+                <button class="btn btn-sm btn-outline-danger" onclick="openModal()"><i class="bi bi-trash" aria-hidden="true" style="color: red;"></i></button></td>
             </div>
         </div>
         <p style="font-size: 10px" id="show_created"></p>
