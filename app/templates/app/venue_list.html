@@ -32,8 +32,12 @@
                         <td>{{ venue.capacity }}</td>
                         <td>{{ venue.contact }}</td>
                         <td>
-                            <a href="{% url 'edit_venue' venue.id %}" class="btn btn-primary">Editar</a>
-                            <a href="{% url 'delete_venue' venue.id %}" class="btn btn-danger">Eliminar</a
+                            <a href="{% url 'edit_venue' venue.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'delete_venue' venue.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}
