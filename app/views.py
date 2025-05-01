@@ -4,8 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.http import HttpResponseServerError
-from .models import RefundRequest
-from .models import Event, User, Ticket
+from .models import Event, User, Comment, Ticket, RefundRequest
 from django.http import HttpResponseForbidden
 
 
@@ -69,14 +68,18 @@ def events(request):
     return render(
         request,
         "app/events.html",
-        {"events": events, "user_is_organizer": request.user.is_organizer},
+        {"events": events, "user_is_organizer": request.user.is_organizer, "user_id": request.user.id},
     )
 
 
 @login_required
 def event_detail(request, id):
     event = get_object_or_404(Event, pk=id)
-    return render(request, "app/event_detail.html", {"event": event, "user_is_organizer": request.user.is_organizer})
+    user_comments = Comment.objects.filter(event = event, user = request.user).exclude(isDeleted = True)
+    other_comments = Comment.objects.filter(event = event, isDeleted=False).exclude(user = request.user)
+    comments_count = user_comments.count() + other_comments.count()
+
+    return render(request, "app/event_detail.html", {"event": event, "user_comments": user_comments, "other_comments": other_comments, "comments_count": comments_count, "user_is_organizer": request.user.is_organizer})
 
 
 @login_required
@@ -139,6 +142,65 @@ def event_form(request, id=None):
         {"event": event, "user_is_organizer": request.user.is_organizer},
     )
 
+@login_required
+def save_comment(request, id):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        text = request.POST.get('text')
+        event = get_object_or_404(Event, id=id)
+
+        Comment.objects.create(
+            title=title,
+            text=text,
+            user=request.user,
+            event=event,
+        )
+        return redirect('event_detail', id=id)
+    return redirect('events')
+
+@login_required
+def edit_comment(request, id):
+    comment = get_object_or_404(Comment, id = id, user = request.user)
+
+    if (request.method == "POST"):
+        comment.title = request.POST.get('title') or comment.title
+        comment.text = request.POST.get('text') or comment.text
+        comment.save()
+        return redirect('event_detail', id=comment.event.id)
+    return redirect('event_detail', id=comment.event.id)
+
+@login_required
+def delete_comment(request, id):
+    comment =get_object_or_404(Comment, id = id, user = request.user)
+
+    if (request.method == "POST"):
+        comment.isDeleted = True
+        comment.save()
+        return redirect('event_detail', id=comment.event.id)
+    return redirect('event_detail', id=comment.event.id)
+
+@login_required
+def admin_delete_comment(request, id):
+    comment =get_object_or_404(Comment, id = id)
+
+    if (request.method == "POST"):
+        comment.isDeleted = True
+        comment.save()
+        return redirect('admin_comments')
+    return redirect('admin_comments')
+
+@login_required
+def admin_comments(request):
+    events = Event.objects.filter(organizer = request.user)
+    admin_comments = []
+    for event in events:
+        comments = Comment.objects.filter(isDeleted = False, event=event)
+        admin_comments.extend(comments)
+    return render(
+    request,
+    "app/comments.html",
+    {"admin_comments": admin_comments},
+)
 def tickets(request):
     user=request.user
     

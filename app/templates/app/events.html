@@ -10,9 +10,17 @@
             <a
                 href="{% url 'event_form' %}"
                 class="btn btn-primary"
+                style="margin-left: auto"
             >
                 <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
                 Crear Evento
+            </a>
+            <a
+                href="{% url 'admin_comments'%}"
+                class="btn btn-primary"
+                style="margin-left: 10px"
+            >
+                Comentarios
             </a>
         {% endif %}
     </div>
@@ -42,7 +50,7 @@
                             {% if user_is_organizer %}
                                 <a href="{% url 'event_edit' event.id %}"
                                     class="btn btn-sm btn-outline-secondary"
-                                    aria-label="Editar"
+                                    aria-label="Editar" 
                                     title="Editar">
                                     <i class="bi bi-pencil" aria-hidden="true"></i>
                                 </a>
