@@ -307,31 +307,19 @@ def create_venue(request):
 
     return render(request, 'app/venue_form.html')
 
-@login_required
-def edit_venue(request, venue_id):
-    venue = get_object_or_404(Venue, pk=venue_id)
-
+def edit_venue(request, id):
+    venue = get_object_or_404(Venue, id=id)  # Obtener el venue por ID
+    
     if request.method == 'POST':
+        # Si el formulario es válido, actualiza el venue
         venue.name = request.POST.get('name')
         venue.address = request.POST.get('address')
         venue.city = request.POST.get('city')
         venue.capacity = request.POST.get('capacity')
         venue.contact = request.POST.get('contact')
-
-        # Validación de datos
-        if not venue.name or not venue.address or not venue.city or not venue.capacity or not venue.contact:
-            return HttpResponse("Todos los campos son obligatorios", status=400)
-
         venue.save()
 
-        return redirect('list_venues')
+        return redirect('list_venues')  # Redirige después de guardar
 
-    return render(request, 'app/venue_form.html', {'venue': venue})
-
-@login_required
-def delete_venue(request, venue_id):
-    venue = get_object_or_404(Venue, pk=venue_id)
-    
-    # Si el usuario está autorizado para eliminar el venue (opcional)
-    venue.delete()
-    return redirect('list_venues')
+    # Si es GET, mostrar los datos actuales en el formulario
+    return render(request, 'app/venue_edit.html', {'venue': venue})

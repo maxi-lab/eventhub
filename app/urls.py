@@ -27,5 +27,6 @@ urlpatterns = [
     path("refunds/delete/<int:request_id>/", views.delete_refund_request, name="delete_refund_request"),
     path("refunds/<int:request_id>/", views.refund_request_detail, name="refund_request_detail"),
     path('venues/', views.list_venues, name='list_venues'),
-    path('venues/create/', views.create_venue, name='create_venue')
+    path('venues/create/', views.create_venue, name='create_venue'),
+    path('venues/edit/<int:id>/', views.edit_venue, name='edit_venue'),
 ]

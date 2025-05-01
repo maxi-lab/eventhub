@@ -32,9 +32,7 @@
                         <td>{{ venue.capacity }}</td>
                         <td>{{ venue.contact }}</td>
                         <td>
-                            <!-- Aquí puedes agregar botones para editar, eliminar, etc. -->
                             <a href="{% url 'edit_venue' venue.id %}" class="btn btn-primary">Editar</a>
-                            <a href="{% url 'delete_venue' venue.id %}" class="btn btn-danger">Eliminar</a>
                         </td>
                     </tr>
                 {% endfor %}
