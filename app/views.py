@@ -323,3 +323,13 @@ def edit_venue(request, id):
 
     # Si es GET, mostrar los datos actuales en el formulario
     return render(request, 'app/venue_edit.html', {'venue': venue})
+
+@login_required
+def delete_venue(request, id):
+    venue = get_object_or_404(Venue, id=id)
+    
+    if request.method == 'POST':
+        venue.delete()
+        return redirect('list_venues')  # Redirige a la lista de venues después de eliminar
+
+    return render(request, 'app/venue_confirm_delete.html', {'venue': venue})
