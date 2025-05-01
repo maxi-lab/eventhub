@@ -63,7 +63,7 @@ def events(request):
     return render(
         request,
         "app/events.html",
-        {"events": events, "user_is_organizer": request.user.is_organizer},
+        {"events": events, "user_is_organizer": request.user.is_organizer, "user_id": request.user.id},
     )
 
 
@@ -165,3 +165,26 @@ def delete_comment(request, id):
         comment.save()
         return redirect('event_detail', id=comment.event.id)
     return redirect('event_detail', id=comment.event.id)
+
+@login_required
+def admin_delete_comment(request, id):
+    comment =get_object_or_404(Comment, id = id)
+
+    if (request.method == "POST"):
+        comment.isDeleted = True
+        comment.save()
+        return redirect('admin_comments')
+    return redirect('admin_comments')
+
+@login_required
+def admin_comments(request):
+    events = Event.objects.filter(organizer = request.user)
+    admin_comments = []
+    for event in events:
+        comments = Comment.objects.filter(isDeleted = False, event=event)
+        admin_comments.extend(comments)
+    return render(
+    request,
+    "app/comments.html",
+    {"admin_comments": admin_comments},
+)
