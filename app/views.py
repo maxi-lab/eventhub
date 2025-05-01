@@ -333,3 +333,8 @@ def delete_venue(request, id):
         return redirect('list_venues')  # Redirige a la lista de venues después de eliminar
 
     return render(request, 'app/venue_confirm_delete.html', {'venue': venue})
+
+@login_required
+def venue_detail(request, venue_id):
+    venue = get_object_or_404(Venue, pk=venue_id)
+    return render(request, 'app/venue_detail.html', {'venue': venue})

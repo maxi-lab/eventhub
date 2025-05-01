@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="container">
-        <h1>Lista de Venues</h1>
+        <h1>Lista de Lugares</h1>
 
         <!-- Botón de "Crear Venue" en la parte superior derecha -->
         <div class="d-flex justify-content-end mb-3">
@@ -32,6 +32,9 @@
                         <td>{{ venue.capacity }}</td>
                         <td>{{ venue.contact }}</td>
                         <td>
+                            <a href="{% url 'venue_detail' venue.id %}" class="btn btn-sm btn-outline-secondary me-1" title="Ver">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
                             <a href="{% url 'edit_venue' venue.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
