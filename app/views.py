@@ -7,7 +7,9 @@ from django.utils import timezone
 from django.http import HttpResponseServerError
 from .models import Event, User, Comment, Ticket, RefundRequest
 from django.http import HttpResponseForbidden
-
+from .models import RefundRequest
+from .models import Event, User, Ticket, Venue
+from django.http import HttpResponseForbidden, HttpResponse
 from .models import Event, User, UserNotification, Notification
 from .models import Category
 from django.db.models import Count
@@ -547,3 +549,62 @@ def category_form(request, id=None):
         "app/category_form.html",
         {"category": category, "user_is_organizer": request.user.is_organizer},
     )
+
+@login_required
+def list_venues(request):
+    venues = Venue.objects.all()
+    return render(request, 'app/venue_list.html', {'venues': venues})
+
+@login_required
+def create_venue(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        capacity = request.POST.get('capacity')
+        contact = request.POST.get('contact')
+
+        if not name or not address or not city or not capacity or not contact:
+            return HttpResponse("Todos los campos son obligatorios", status=400)
+
+        venue = Venue.objects.create(
+            name=name,
+            address=address,
+            city=city,
+            capacity=capacity,
+            contact=contact
+        )
+
+        return redirect('list_venues')
+
+    return render(request, 'app/venue_form.html')
+
+def edit_venue(request, id):
+    venue = get_object_or_404(Venue, id=id)
+    
+    if request.method == 'POST':
+        venue.name = request.POST.get('name')
+        venue.address = request.POST.get('address')
+        venue.city = request.POST.get('city')
+        venue.capacity = request.POST.get('capacity')
+        venue.contact = request.POST.get('contact')
+        venue.save()
+
+        return redirect('list_venues')
+
+    return render(request, 'app/venue_edit.html', {'venue': venue})
+
+@login_required
+def delete_venue(request, id):
+    venue = get_object_or_404(Venue, id=id)
+    
+    if request.method == 'POST':
+        venue.delete()
+        return redirect('list_venues')
+
+    return render(request, 'app/venue_confirm_delete.html', {'venue': venue})
+
+@login_required
+def venue_detail(request, venue_id):
+    venue = get_object_or_404(Venue, pk=venue_id)
+    return render(request, 'app/venue_detail.html', {'venue': venue})
