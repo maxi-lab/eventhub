@@ -1,6 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+class ActiveManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
 
 class User(AbstractUser):
     is_organizer = models.BooleanField(default=False)
@@ -30,6 +33,10 @@ class Category(models.Model):
     name = models.CharField()
     description = models.TextField()
     is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+
+    objects = ActiveManager()
+    all_objects = models.Manager()
 
     def __str__(self) -> str:
         return self.name
@@ -68,6 +75,9 @@ class Category(models.Model):
 
         self.save()
 
+    def delete(self, using=None, keep_parents=False):
+        self.is_deleted = True
+        self.save()
 
 class Event(models.Model):
     title = models.CharField(max_length=200)
