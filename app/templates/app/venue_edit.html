@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Venue{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Editar Venue</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="name" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ venue.name }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="address" name="address" value="{{ venue.address }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="city" class="form-label">Ciudad</label>
+                <input type="text" class="form-control" id="city" name="city" value="{{ venue.city }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="capacity" class="form-label">Capacidad</label>
+                <input type="number" class="form-control" id="capacity" name="capacity" value="{{ venue.capacity }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="contact" class="form-label">Contacto</label>
+                <input type="text" class="form-control" id="contact" name="contact" value="{{ venue.contact }}" required>
+            </div>
+
+            <button type="submit" class="btn btn-success">Guardar Cambios</button>
+        </form>
+    </div>
+{% endblock %}

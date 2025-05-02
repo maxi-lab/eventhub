@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Eliminación{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-danger">
+        <div class="card-header bg-danger text-white">
+            <h3><i class="bi bi-exclamation-triangle-fill"></i> Confirmar Eliminación</h3>
+        </div>
+        <div class="card-body">
+            <p class="lead">
+                ¿Estás seguro de que quieres eliminar el lugar <strong>"{{ venue.name }}"</strong>? Esta acción no se puede deshacer.
+            </p>
+
+            <form method="POST" class="d-flex gap-2 mt-4">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash-fill"></i> Sí, eliminar
+                </button>
+                <a href="{% url 'list_venues' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
