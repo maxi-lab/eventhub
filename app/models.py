@@ -179,6 +179,8 @@ class RefundRequest(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     reason=models.TextField()
     status=models.CharField(max_length=10, choices=[("PENDING", "Pendiente"), ("APPROVED", "Aprobada"), ("DENIED", "Denegada")], default="PENDING")
+    is_deleted = models.BooleanField(default=False)
+
     @classmethod
     def create_request(cls, user, ticket_code, reason):
         errors = {}
@@ -193,9 +195,10 @@ class RefundRequest(models.Model):
             errors["reason"] = "Debe ingresar un motivo"
             return False, errors
 
-        if cls.objects.filter(ticket=ticket, status="PENDING").exists():
-            errors["request"] = "Ya existe una solicitud pendiente para este ticket"
+        if cls.objects.filter(ticket=ticket, status="PENDING", is_deleted=False).exists():
+            errors["ticket"] = "Ya existe una solicitud pendiente para este ticket"
             return False, errors
+
 
         cls.objects.create(ticket=ticket, reason=reason)
         return True, None
@@ -236,8 +239,10 @@ class RefundRequest(models.Model):
             errors["status"] = "Solo se pueden eliminar solicitudes pendientes"
             return False, errors
 
-        request.delete()
+        request.is_deleted = True
+        request.save()
         return True, None
+
     
     def change_status(self, new_status, admin_user):
         errors = {}

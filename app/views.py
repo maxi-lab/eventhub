@@ -418,13 +418,13 @@ def create_refund_request(request):
 
 @login_required
 def my_refund_requests(request):
-    requests = RefundRequest.objects.filter(ticket__user=request.user).order_by("-created_at")
+    requests = RefundRequest.objects.filter(ticket__user=request.user, is_deleted=False).order_by("-created_at")
     return render(request, "app/refund_my_list.html", {"refund_requests": requests})
 
 
 @login_required
 def edit_refund_request(request, request_id):
-    refund = get_object_or_404(RefundRequest, id=request_id)
+    refund = get_object_or_404(RefundRequest, id=request_id, is_deleted=False)
 
     if refund.ticket.user != request.user:
         return HttpResponseForbidden("No tienes permiso para editar esta solicitud.")
@@ -441,7 +441,7 @@ def edit_refund_request(request, request_id):
 
 @login_required
 def delete_refund_request(request, request_id):
-    refund = get_object_or_404(RefundRequest, id=request_id)
+    refund = get_object_or_404(RefundRequest, id=request_id, is_deleted=False)
 
     if refund.ticket.user != request.user:
         return HttpResponseForbidden("No tienes permiso para eliminar esta solicitud.")
@@ -458,7 +458,7 @@ def delete_refund_request(request, request_id):
 @login_required
 @user_passes_test(is_admin, login_url='/events', redirect_field_name=None)
 def manage_refund_requests(request):
-    refunds = RefundRequest.objects.all().order_by("-created_at")
+    refunds = RefundRequest.objects.filter(is_deleted=False).order_by("-created_at")
 
     if request.method == "POST":
         request_id = request.POST.get("request_id")
@@ -475,9 +475,10 @@ def manage_refund_requests(request):
 
 @login_required
 def refund_request_detail(request, request_id):
-    refund = get_object_or_404(RefundRequest, id=request_id)
-    
+    refund = get_object_or_404(RefundRequest, id=request_id, is_deleted=False)
+
     if refund.ticket.user != request.user and not request.user.is_organizer:
         return HttpResponseForbidden("No tenés permiso para ver esta solicitud.")
 
     return render(request, "app/refund_detail.html", {"refund": refund})
+

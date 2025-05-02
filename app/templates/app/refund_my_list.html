@@ -50,7 +50,7 @@
                     <a href="{% url 'edit_refund_request' refund.id %}" class="btn btn-sm btn-outline-secondary" title="Editar">
                         <i class="bi bi-pencil" aria-hidden="true"></i>
                     </a>
-                    <a href="{% url 'edit_refund_request' refund.id %}?delete=1" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                    <a href="{% url 'delete_refund_request' refund.id %}?delete=1" class="btn btn-sm btn-outline-danger" title="Eliminar">
                         <i class="bi bi-trash" aria-hidden="true"></i>
                     </a>
                 </td>
