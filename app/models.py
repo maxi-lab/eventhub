@@ -370,7 +370,9 @@ class Venue(models.Model):
     city = models.CharField(max_length=100)
     capacity = models.PositiveIntegerField()
     contact = models.CharField(max_length=100)
+    isDeleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
+
 

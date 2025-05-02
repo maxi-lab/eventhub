@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="container">
-        <h1>Crear Venue</h1>
+        <h1>Crear Lugar</h1>
 
         <form method="POST">
             {% csrf_token %}
@@ -29,7 +29,7 @@
                 <input type="text" class="form-control" id="contact" name="contact" required>
             </div>
 
-            <button type="submit" class="btn btn-success">Crear Venue</button>
+            <button type="submit" class="btn btn-success">Crear Lugar</button>
         </form>
     </div>
 {% endblock %}

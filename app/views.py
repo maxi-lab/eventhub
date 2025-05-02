@@ -599,6 +599,7 @@ def delete_venue(request, id):
     venue = get_object_or_404(Venue, id=id)
     
     if request.method == 'POST':
+        venue.isDeleted = True
         venue.delete()
         return redirect('list_venues')
 
