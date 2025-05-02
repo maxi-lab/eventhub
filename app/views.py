@@ -421,6 +421,9 @@ def create_refund_request(request):
 
 @login_required
 def my_refund_requests(request):
+    user=request.user
+    if user.is_organizer:
+        return redirect("manage_refund_requests")
     requests = RefundRequest.objects.filter(ticket__user=request.user, is_deleted=False).order_by("-created_at")
     return render(request, "app/refund_my_list.html", {"refund_requests": requests})
 
