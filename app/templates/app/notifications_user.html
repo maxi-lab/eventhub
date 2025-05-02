@@ -32,7 +32,7 @@
                             <small class="text-muted">{{ notification.created_at|date:"d M Y, H:i" }}</small>
                         </div>
                         {% if not user_notification.is_read %}
-                            <form method="post" action="{% url 'notificationsMarkRead' user_notification.id %}">
+                            <form method="post" action="{% url 'notifications_mark_read' user_notification.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-outline-primary btn-sm">Marcar como leída</button>
                             </form>
