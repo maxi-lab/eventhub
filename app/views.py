@@ -342,11 +342,9 @@ def notifications_form(request, pk=None):
     
 def tickets(request):
     user=request.user
-    
     if user.is_organizer:
         events = Event.objects.filter(organizer=user).order_by("scheduled_at")
         tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
-        print(tickets)
         for t in tickets:
             if t.event not in events:
                 tickets=tickets.exclude(pk=t.pk)
@@ -365,7 +363,6 @@ def ticket_form(request,id=None):
     if id is not None:
         ticket=get_object_or_404(Ticket, pk=id)
     if request.method == "POST":
-        print(request.POST)
         tipo_ticket=request.POST.get("type_ticket")
         event_id=request.POST.get("event_id")
         quantity=int(request.POST.get("quantity"))
@@ -432,6 +429,9 @@ def create_refund_request(request):
 
 @login_required
 def my_refund_requests(request):
+    user=request.user
+    if user.is_organizer:
+        return redirect("manage_refund_requests")
     requests = RefundRequest.objects.filter(ticket__user=request.user, is_deleted=False).order_by("-created_at")
     return render(request, "app/refund_my_list.html", {"refund_requests": requests})
 

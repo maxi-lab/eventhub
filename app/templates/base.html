@@ -48,7 +48,11 @@
                                 {% navbar_link 'tickets' 'Tickets' %}
                             </li>
                             <li class="nav-item">
+                                {% if not user.is_organizer %}
                                 {% navbar_link 'my_refund_requests' 'Solicitudes de Reembolso' %}
+                                {% else %}
+                                {% navbar_link 'manage_refund_requests' 'Gestion de Reembolsos' %}
+                                {% endif %}
                             </li>                   
                             {% if not user.is_organizer %}
                                 <li class="nav-item position-relative">
