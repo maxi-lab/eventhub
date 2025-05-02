@@ -38,7 +38,7 @@
                     <td> {{ category.event_count }} Eventos </td>
                     <td>
                         <div class="hstack gap-1">
-                            <a 
+                            <a  href="{% url 'category_detail' category.id %}"
                                 class="btn btn-sm btn-outline-primary"
                                 aria-label="Ver detalle"
                                 title="Ver detalle">
