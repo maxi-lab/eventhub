@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Gestión de Notificaciones</h1>
+    <a href="{% url 'notifications_create_edit' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-2"></i> Crear Notificación
+    </a>
+  </div>
+
+  <form method="get" class="mb-3 p-2 card shadow-sm d-flex flex-row align-items-center justify-content-between">
+    <div class="col-md-3">
+      <input type="text" name="title" class="form-control" placeholder="Buscar notificaciones..." value="{{ request.GET.title }}">
+    </div>
+    <div class="col-md-3">
+      <select name="event" class="form-select">
+        <option value="">Todos los eventos</option>
+        {% for event in events %}
+        <option value="{{ event.id }}" {% if request.GET.event == event.id|stringformat:"s" %}selected{% endif %}>
+          {{ event.title }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="priority" class="form-select">
+        <option value="">Todas las prioridades</option>
+        <option value="Media" {% if request.GET.priority == "Media" %}selected{% endif %}>Media</option>
+        <option value="Alta" {% if request.GET.priority == "Alta" %}selected{% endif %}>Alta</option>
+        <option value="Baja" {% if request.GET.priority == "Baja" %}selected{% endif %}>Baja</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Título</th>
+          <th>Evento</th>
+          <th>Destinatarios</th>
+          <th>Prioridad</th>
+          <th>Fecha de envío</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for notification in notifications %}
+        <tr>
+          <td>{{ notification.title }}</td>
+          <td>
+            {% if notification.event %}
+              <a href="#" class="text-primary text-decoration-none">{{ notification.event.title }}</a>
+            {% else %}
+              Sin evento
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge bg-info rounded-pill">{{ notification.users.count }}</span>
+          </td>
+          <td>
+            <span class="badge 
+              {% if notification.priority == 'Alta' %}bg-danger
+              {% elif notification.priority == 'Baja' %}bg-secondary
+              {% else %}bg-primary
+              {% endif %} rounded-pill">
+              {{ notification.priority }}
+            </span>
+          </td>
+          <td>{{ notification.created_at|date:"d M Y, H:i" }}</td>
+          <td>
+            <button class='btn btn-outline-primary btn-sm me-1'
+              onclick='showNotificationModal(
+                "{{ notification.title|escapejs }}",
+                "{{ notification.message|escapejs }}",
+                "{{ notification.created_at|date:'d F Y, H:i' }}",
+                "{{ notification.priority }}"
+              )'>
+              <i class="bi bi-eye"></i>
+            </button>
+
+            <form action="{% url 'notifications_create_edit' notification.id %}" method="get" style="display:inline;">
+              <button type="submit" class="btn btn-outline-warning btn-sm me-1">
+                <i class="bi bi-pencil"></i>
+              </button>
+            </form>
+
+            <button class='btn btn-outline-danger btn-sm'
+              onclick='confirmDelete({{ notification.id }}, "{{ notification.title|escapejs }}")'>
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Ver -->
+<div class="modal fade" id="modalView" tabindex="-1" aria-labelledby="modalViewLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg border-0 rounded-4">
+      <div class="modal-header bg-primary text-white rounded-top-4">
+        <h5 class="modal-title d-flex align-items-center" id="modalViewLabel">
+          <i class="bi bi-bell-fill me-2"></i> Detalles de Notificación
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <h6 class="text-muted">Título</h6>
+          <p class="fs-5 mb-0" id="modalViewTitle"></p>
+        </div>
+        <div class="mb-3">
+          <h6 class="text-muted">Descripción</h6>
+          <p class="mb-0" id="modalViewMessage"></p>
+        </div>
+        <div class="mb-3">
+          <h6 class="text-muted">Fecha</h6>
+          <p class="mb-0" id="modalViewDate"></p>
+        </div>
+        <div class="mb-3">
+          <h6 class="text-muted">Prioridad</h6>
+          <span id="modalViewPriority" class="badge rounded-pill"></span>
+        </div>
+      </div>
+      <div class="modal-footer bg-light rounded-bottom-4">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Eliminar -->
+<div class="modal fade" id="modalDelete" tabindex="-1" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-sm rounded-4">
+      <div class="modal-header bg-danger text-white rounded-top-4">
+        <h5 class="modal-title" id="modalDeleteLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        <i class="bi bi-exclamation-triangle-fill text-danger display-3 mb-3"></i>
+        <p class="fs-5 mb-0">¿Estás seguro de que querés eliminar esta notificación?</p>
+        <p class="text-muted" id="deleteModalTitle"></p>
+      </div>
+      <div class="modal-footer justify-content-center bg-light rounded-bottom-4">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+        <form method="POST" id="deleteForm">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showNotificationModal(title, message, date, priority) {
+    document.getElementById('modalViewTitle').innerText = title;
+    document.getElementById('modalViewMessage').innerText = message;
+    document.getElementById('modalViewDate').innerText = date;
+
+    const badge = document.getElementById('modalViewPriority');
+    badge.innerText = priority;
+    badge.className = 'badge rounded-pill ' +
+      (priority === 'Alta' ? 'bg-danger' :
+        priority === 'Baja' ? 'bg-secondary' : 'bg-primary');
+
+    new bootstrap.Modal(document.getElementById('modalView')).show();
+  }
+
+  function confirmDelete(id, title) {
+    document.getElementById('deleteModalTitle').innerText = title;
+    document.getElementById('deleteForm').action = `/notifications/delete/${id}/`;
+    new bootstrap.Modal(document.getElementById('modalDelete')).show();
+  }
+</script>
+{% endblock %}

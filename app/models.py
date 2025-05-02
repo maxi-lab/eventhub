@@ -77,6 +77,33 @@ class Event(models.Model):
 
         self.save()
 
+
+class Priority(models.TextChoices):
+    HIGH = "HIGH", "Alta"
+    MEDIUM = "MEDIUM", "Media"
+    LOW = "LOW", "Baja"
+
+class Notification(models.Model):
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted=models.BooleanField(default=False)
+    priority = models.CharField(
+        max_length=10,
+        choices=Priority.choices,
+        default=Priority.MEDIUM,
+    )
+    users = models.ManyToManyField(User, through='UserNotification', related_name="notifications")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="notifications", null=True, blank=True)
+
+class UserNotification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user', 'notification')
+
 class Ticket(models.Model):
     GENERAL="GRL"
     VIP="VIP"
