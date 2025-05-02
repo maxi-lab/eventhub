@@ -76,6 +76,10 @@
                                 </a>
                             </td>
                         </tr>
+                        {% empty%}
+                        <tr>
+                            <td colspan="4" class="text-center">No hay eventos de esta categoría.</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
