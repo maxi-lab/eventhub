@@ -38,4 +38,10 @@ urlpatterns = [
     path('comments/<int:id>/delete', views.delete_comment, name='delete_comment'),
     path('comments/<int:id>/admin_delete', views.admin_delete_comment, name='admin_delete_comment'),
     path('admin_comments/', views.admin_comments, name='admin_comments'),
+
+    path("categories/", views.categories, name="categories"),
+    path("categories/create/", views.category_form, name="category_form"),
+    path("categories/<int:id>/edit/", views.category_form, name="category_edit"),
+    path("categories/<int:id>/", views.category_detail, name="category_detail"),
+    path("categories/<int:id>/delete/", views.category_delete, name="category_delete"),
 ]

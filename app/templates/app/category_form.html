@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">
+                {% if category.id %}
+                    Editar categoría
+                {% else %}
+                    Crear categoría
+                {% endif %}
+            </h1>
+
+            <div class="card">
+                <div class="card-body">
+                    {% if category.id %}
+                        <form action="{% url 'category_edit' category.id %}" method="POST">
+                    {% else %}
+                        <form action="{% url 'category_form' %}" method="POST">
+                    {% endif %}
+                        {% csrf_token %}
+                        <div class="vstack gap-3">
+                            <div>
+                                <label for="name" class="form-label">Nombre de la categoría</label>
+                                <input class="form-control"
+                                    id="name"
+                                    required=""
+                                    type="text"
+                                    value="{{ category.name }}"
+                                    name="name" />
+                            </div>
+                            <div>
+                                <label for="description" class="form-label">Descripción</label>
+                                <textarea
+                                    class="form-control"
+                                    id="description"
+                                    name="description"
+                                    rows="4"
+                                    required="">{{ category.description }}</textarea>
+                            </div>
+                            <div>
+                                <input type="checkbox" class="custom-control-input" id="is_active" name="is_active"
+                                    {% if not category.id or category.is_active %} 
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="custom-control-label" for="is_active">Activo</label>
+                            </div>
+                            <div>
+                                {% if category.id %}
+                                    <button type="submit" class="btn btn-primary">Editar Categoría</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-primary">Crear Categoría</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -63,6 +63,17 @@
                         </ul>
                     </div>
 
+                    <div
+                        class="collapse navbar-collapse"
+                        id="navbar-content"
+                    >
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                {% navbar_link 'categories' 'Categorías' %}
+                            </li>
+                        </ul>
+                    </div>
+
                     <form
                         class="d-flex"
                         action={% url 'logout' %}
