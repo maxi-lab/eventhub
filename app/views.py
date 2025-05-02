@@ -334,11 +334,9 @@ def notifications_form(request, pk=None):
     
 def tickets(request):
     user=request.user
-    
     if user.is_organizer:
         events = Event.objects.filter(organizer=user).order_by("scheduled_at")
         tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
-        print(tickets)
         for t in tickets:
             if t.event not in events:
                 tickets=tickets.exclude(pk=t.pk)
@@ -357,7 +355,6 @@ def ticket_form(request,id=None):
     if id is not None:
         ticket=get_object_or_404(Ticket, pk=id)
     if request.method == "POST":
-        print(request.POST)
         tipo_ticket=request.POST.get("type_ticket")
         event_id=request.POST.get("event_id")
         quantity=int(request.POST.get("quantity"))
