@@ -5,9 +5,14 @@
     <h2 class="mb-4">
         Notificaciones 
         {% if new_count > 0 %}
-            <span class="badge bg-danger">{{ new_count }} nuevas</span>
+        <span class="badge bg-danger">
+            {{ new_count }} {% if new_count == 1 %}Nueva{% else %}nuevas{% endif %}
+        </span>
         {% endif %}
-        <a href="#" class="btn btn-outline-primary float-end btn-sm">Marcar todas como leídas</a>
+        <form method="post" action="{% url 'notifications_mark_all_read' %}" class="d-inline float-end">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary btn-sm">Marcar todas como leídas</button>
+        </form>
     </h2>
 
     <div class="list-group">
