@@ -7,7 +7,9 @@ from django.utils import timezone
 from django.http import HttpResponseServerError
 from .models import Event, User, Comment, Ticket, RefundRequest
 from django.http import HttpResponseForbidden
-
+from .models import RefundRequest
+from .models import Event, User, Ticket, Venue
+from django.http import HttpResponseForbidden, HttpResponse
 from .models import Event, User, UserNotification, Notification
 from .models import Category
 from django.db.models import Count
@@ -121,6 +123,7 @@ def event_form(request, id=None):
         date = request.POST.get("date")
         time = request.POST.get("time")
         category = get_object_or_404(Category, pk=request.POST.get("category"))
+        venue = get_object_or_404(Venue, pk=request.POST.get("venue"))
 
         [year, month, day] = date.split("-")
         [hour, minutes] = time.split(":")
@@ -130,10 +133,10 @@ def event_form(request, id=None):
         )
 
         if id is None:
-            Event.new(title, description, scheduled_at, request.user, category)
+            Event.new(title, description, scheduled_at, request.user, category, venue)
         else:
             event = get_object_or_404(Event, pk=id)
-            event.update(title, description, scheduled_at, request.user, category)
+            event.update(title, description, scheduled_at, request.user, category, venue)
 
         return redirect("events")
 
@@ -142,10 +145,17 @@ def event_form(request, id=None):
         event = get_object_or_404(Event, pk=id)
 
     categories = Category.objects.filter(is_active=True)
+    venues = Venue.objects.filter(isDeleted=False)
+
     return render(
         request,
         "app/event_form.html",
-        {"event": event, "user_is_organizer": request.user.is_organizer, "categories":categories},
+        {
+            "event": event,
+            "user_is_organizer": request.user.is_organizer,
+            "categories": categories,
+            "venues": venues,
+        },
     )
 
 @login_required
@@ -268,7 +278,7 @@ def notifications_delete(request, pk):
 
 
 @login_required
-def notifications_create_edit(request, pk=None):
+def notifications_form(request, pk=None):
     if pk:
         notification = get_object_or_404(Notification, pk=pk)
         is_edit = True
@@ -322,7 +332,7 @@ def notifications_create_edit(request, pk=None):
 
         return redirect('notifications_organizer')
 
-    return render(request, 'app/notifications_create_edit.html', {
+    return render(request, 'app/notifications_form.html', {
         'notification': notification,
         'is_edit': is_edit,
         'events': Event.objects.all(),
@@ -332,11 +342,9 @@ def notifications_create_edit(request, pk=None):
     
 def tickets(request):
     user=request.user
-    
     if user.is_organizer:
         events = Event.objects.filter(organizer=user).order_by("scheduled_at")
         tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
-        print(tickets)
         for t in tickets:
             if t.event not in events:
                 tickets=tickets.exclude(pk=t.pk)
@@ -355,7 +363,6 @@ def ticket_form(request,id=None):
     if id is not None:
         ticket=get_object_or_404(Ticket, pk=id)
     if request.method == "POST":
-        print(request.POST)
         tipo_ticket=request.POST.get("type_ticket")
         event_id=request.POST.get("event_id")
         quantity=int(request.POST.get("quantity"))
@@ -422,6 +429,9 @@ def create_refund_request(request):
 
 @login_required
 def my_refund_requests(request):
+    user=request.user
+    if user.is_organizer:
+        return redirect("manage_refund_requests")
     requests = RefundRequest.objects.filter(ticket__user=request.user, is_deleted=False).order_by("-created_at")
     return render(request, "app/refund_my_list.html", {"refund_requests": requests})
 
@@ -547,3 +557,63 @@ def category_form(request, id=None):
         "app/category_form.html",
         {"category": category, "user_is_organizer": request.user.is_organizer},
     )
+
+@login_required
+def list_venues(request):
+    venues = Venue.objects.all()
+    return render(request, 'app/venue_list.html', {'venues': venues})
+
+@login_required
+def create_venue(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        capacity = request.POST.get('capacity')
+        contact = request.POST.get('contact')
+
+        if not name or not address or not city or not capacity or not contact:
+            return HttpResponse("Todos los campos son obligatorios", status=400)
+
+        venue = Venue.objects.create(
+            name=name,
+            address=address,
+            city=city,
+            capacity=capacity,
+            contact=contact
+        )
+
+        return redirect('list_venues')
+
+    return render(request, 'app/venue_form.html')
+
+def edit_venue(request, id):
+    venue = get_object_or_404(Venue, id=id)
+    
+    if request.method == 'POST':
+        venue.name = request.POST.get('name')
+        venue.address = request.POST.get('address')
+        venue.city = request.POST.get('city')
+        venue.capacity = request.POST.get('capacity')
+        venue.contact = request.POST.get('contact')
+        venue.save()
+
+        return redirect('list_venues')
+
+    return render(request, 'app/venue_edit.html', {'venue': venue})
+
+@login_required
+def delete_venue(request, id):
+    venue = get_object_or_404(Venue, id=id)
+    
+    if request.method == 'POST':
+        venue.isDeleted = True
+        venue.delete()
+        return redirect('list_venues')
+
+    return render(request, 'app/venue_confirm_delete.html', {'venue': venue})
+
+@login_required
+def venue_detail(request, venue_id):
+    venue = get_object_or_404(Venue, pk=venue_id)
+    return render(request, 'app/venue_detail.html', {'venue': venue})

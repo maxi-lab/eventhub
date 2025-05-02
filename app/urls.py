@@ -16,8 +16,8 @@ urlpatterns = [
     path('notifications_user/', views.notifications_user, name='notifications_user'),
     path('notifications/mark_all_read/', views.mark_all_notifications_read, name='notifications_mark_all_read'),
     path('notifications_organizer/', views.notifications_organizer, name='notifications_organizer'),
-    path('notifications_create/', views.notifications_create_edit, name='notifications_create_edit'),
-    path('notifications/edit/<int:pk>/', views.notifications_create_edit, name='notifications_create_edit'),
+    path('notifications_create/', views.notifications_form, name='notifications_form'),
+    path('notifications/edit/<int:pk>/', views.notifications_form, name='notifications_form'),
     path('notifications/delete/<int:pk>/', views.notifications_delete, name='notifications_delete'),
     path('notifications/<int:pk>/read/', views.mark_notification_read, name='notifications_mark_read'),
     path("events/<int:id>/tickets/", views.event_tickets, name="event_tickets"),
@@ -38,10 +38,15 @@ urlpatterns = [
     path('comments/<int:id>/delete', views.delete_comment, name='delete_comment'),
     path('comments/<int:id>/admin_delete', views.admin_delete_comment, name='admin_delete_comment'),
     path('admin_comments/', views.admin_comments, name='admin_comments'),
-
     path("categories/", views.categories, name="categories"),
     path("categories/create/", views.category_form, name="category_form"),
     path("categories/<int:id>/edit/", views.category_form, name="category_edit"),
     path("categories/<int:id>/", views.category_detail, name="category_detail"),
     path("categories/<int:id>/delete/", views.category_delete, name="category_delete"),
+    path('venues/', views.list_venues, name='list_venues'),
+    path('venues/create/', views.create_venue, name='create_venue'),
+    path('venues/edit/<int:id>/', views.edit_venue, name='edit_venue'),
+    path('venues/delete/<int:id>/', views.delete_venue, name='delete_venue'),
+    path('venues/<int:venue_id>/', views.venue_detail, name='venue_detail'),
+
 ]

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle del Venue{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Detalles del Lugar</h2>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">{{ venue.name }}</h5>
+            <p class="card-text"><strong>Dirección:</strong> {{ venue.address }}</p>
+            <p class="card-text"><strong>Ciudad:</strong> {{ venue.city }}</p>
+            <p class="card-text"><strong>Capacidad:</strong> {{ venue.capacity }}</p>
+            <p class="card-text"><strong>Contacto:</strong> {{ venue.contact }}</p>
+            <a href="{% url 'list_venues' %}" class="btn btn-outline-secondary mt-3">← Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

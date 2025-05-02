@@ -12,7 +12,7 @@
                     class="btn btn-outline-primary me-2"
                 >
                     <i class="bi bi-pencil me-1"></i>Editar
-                </a>-
+                </a>
             {% endif %}
         </div>
     </div>
@@ -45,6 +45,17 @@
                             </div>
                         {% endif %}
                     </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-light rounded-circle p-2 me-3">
+                            <i class="bi bi-geo-alt text-primary"></i> 
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Ubicación</h6>
+                            <p class="mb-0">{{ event.venue }}</p>
+                        </div>
+                    </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -64,7 +75,7 @@
                                 <button class="menu_button" style="background: lightgray; border: none; cursor: pointer;">&#8942;</button>
                                 <div class="menu-options" style= "display: none; position: absolute;right   : 0; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
                                     <a href="javascript:void(0);" onclick="editComment({{ user_comment.id }})" style="display: block; padding: 5px 10px; text-decoration: none; color: black;">Editar</a>
-                                    <a href="#" onclick="openModal('{% url 'delete_comment' user_comment.id %}')" style="display: block; padding: 5px 10px; text-decoration: none; color: red;">Eliminar</a>                                </div>
+                                    <a href="#" onclick='confirmDelete({{ user_comment.id }}, "{{ user_comment.title|escapejs }}")' style="display: block; padding: 5px 10px; text-decoration: none; color: red;">Eliminar</a>                                </div>
                                 </div>
                             </div>
                             <p style="font-size: 10px">{{user_comment.created_at}}</p>
@@ -103,6 +114,13 @@
                     <h>No hay comentarios</h>
                     <hr>
                 {% endif %}
+                
+        <div class="mb-3" style="display: none" id="alert">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                El título y el comentario no pueden estar vacíos.
+                <button onclick="closeAlert()" type="button" class="btn-close" aria-label="Cerrar"></button>
+            </div>
+        </div>
                 <form action="{% url 'save_comment' event.id %}" method="POST" style="display: flex; flex-direction: column;" id="comment-form">
                     {% csrf_token %}
                     <label style="padding-top: 5px; padding-bottom: 3px;"><b>Título del comentario *</b></label>
@@ -115,16 +133,30 @@
         </div>
     </div>
 </div>
-<div id="deleteModal" style="display: none;">
-    <div class="modal-content">
-        <h2>¿Está seguro que desea eliminar el comentario?</h2>
-        <form id="deleteForm" style="display= none;"  method="POST">
+
+<div class="modal fade" id="modalDelete" tabindex="-1" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-sm rounded-4">
+        <div class="modal-header bg-danger text-white rounded-top-4">
+          <h5 class="modal-title" id="modalDeleteLabel">Confirmar eliminación</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="bi bi-exclamation-triangle-fill text-danger display-3 mb-3"></i>
+          <p class="fs-5 mb-0">¿Estás seguro de que querés eliminar este comentario?</p>
+          <p class="text-muted" id="deleteModalTitle"></p>
+        </div>
+        <div class="modal-footer justify-content-center bg-light rounded-bottom-4">
+          <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+          <form method="POST" id="deleteForm">
             {% csrf_token %}
-            <button onclick="submitForm()" style="background-color: red; border: none; color: white; padding: 5px 10px; border-radius: 5px;">Eliminar</button>
-            <button onclick="closeModal()" style="background-color: #0a6efa; color: white; border: none; padding: 5px 10px; border-radius: 5px;" type= "button">Cancelar</button>
-        </form>
+            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+          </form>
+        </div>
+      </div>
     </div>
-</div>    
+  </div>
+  
 
 <script>
     document.querySelectorAll('.menu_button').forEach(button => {
@@ -164,10 +196,14 @@
         form.addEventListener('submit', function(e) {
             if (!title.value.trim() || !text.value.trim()) {
                 e.preventDefault();
-                alert("El título y el comentario no pueden estar vacíos.");
+                document.getElementById("alert").style.display="block"
             }
         });
     });
+
+    function closeAlert(){
+        document.getElementById("alert").style.display="none"
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.comment-edit textarea').forEach(textarea => {
@@ -197,54 +233,10 @@
         editDiv.style.display = 'none';
     }
 
-    function openModal(deleteUrl) {
-        const modal = document.getElementById('deleteModal');
-        const form = document.getElementById('deleteForm');
-        form.action = deleteUrl;
-        modal.style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('deleteModal').style.display = 'none';
-    }
-
-    function submitForm() {
-        document.getElementById('comment-delete').submit();
-    }
+    function confirmDelete(id, title) {
+        document.getElementById('deleteModalTitle').innerText = title;
+        document.getElementById('deleteForm').action = `/comments/${id}/delete`;
+        new bootstrap.Modal(document.getElementById('modalDelete')).show();
+      }
 </script>
-
-<style>
-    #deleteModal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    }
-    
-    .modal-content {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        width: 300px;
-        max-width: 90%;
-        box-shadow: 0 0 15px rgba(0,0,0,0.3);
-        position: relative;
-    }
-
-    .close {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-</style>
-
 {% endblock %}

@@ -48,9 +48,12 @@
                                 {% navbar_link 'tickets' 'Tickets' %}
                             </li>
                             <li class="nav-item">
+                                {% if not user.is_organizer %}
                                 {% navbar_link 'my_refund_requests' 'Solicitudes de Reembolso' %}
-                            </li>
-                    
+                                {% else %}
+                                {% navbar_link 'manage_refund_requests' 'Gestion de Reembolsos' %}
+                                {% endif %}
+                            </li>                   
                             {% if not user.is_organizer %}
                                 <li class="nav-item position-relative">
                                     {% navbar_link 'notifications_user' '<i class="bi bi-bell position-absolute top-50 start-50 translate-middle"></i>' %}
@@ -70,6 +73,10 @@
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
                                 {% navbar_link 'categories' 'Categorías' %}
+                            <li class="nav-item">
+                                {% if user.is_organizer %}
+                                    {% navbar_link 'list_venues' 'Lugares' %}
+                                {% endif %}
                             </li>
                         </ul>
                     </div>

@@ -33,7 +33,7 @@
                        data-text="{{ comment.text|escapejs }}">
                         <i class="bi bi-eye" aria-hidden="true"></i>
                     </a>
-                <button class="btn btn-sm btn-outline-danger" onclick="javascript:deleteComment('{% url 'admin_delete_comment' comment.id %}')">
+                <button class="btn btn-sm btn-outline-danger" onclick="javascript:deleteComment('{% url 'admin_delete_comment' comment.id %}', 'comment.title|escapejs')">
                     <i class="bi bi-trash" aria-hidden="true" style="color: red;"></i>
                 </button></td>
             </div>
@@ -44,7 +44,7 @@
         <div class="d-flex justify-content-between align-items-center">
             <h id="show_username" style="font-weight: bold"></h>
             <div style= "position: relative;">
-                <button class="btn btn-sm btn-outline-danger" onclick="openModal()"><i class="bi bi-trash" aria-hidden="true" style="color: red;"></i></button></td>
+                <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete()"><i class="bi bi-trash" aria-hidden="true" style="color: red;"></i></button></td>
             </div>
         </div>
         <p style="font-size: 10px" id="show_created"></p>
@@ -53,20 +53,34 @@
     </div>
 
     {% else %}
+    <div class="alert alert-danger mt-2">
         <p>No hay comentarios en los eventos que usted ha creado.</p>
+    </div>
     {% endif %}
 
 </div>
-<div id="deleteModal" style="display: none;">
-    <div class="modal-content">
-        <h2>¿Está seguro que desea eliminar el comentario?</h2>
-        <form id="deleteForm" style="display= none;"  method="POST">
+<div class="modal fade" id="modalDelete" tabindex="-1" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-sm rounded-4">
+        <div class="modal-header bg-danger text-white rounded-top-4">
+          <h5 class="modal-title" id="modalDeleteLabel">Confirmar eliminación</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="bi bi-exclamation-triangle-fill text-danger display-3 mb-3"></i>
+          <p class="fs-5 mb-0">¿Estás seguro de que querés eliminar este comentario?</p>
+          <p class="text-muted" id="deleteModalTitle"></p>
+        </div>
+        <div class="modal-footer justify-content-center bg-light rounded-bottom-4">
+          <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+          <form method="POST" id="deleteForm">
             {% csrf_token %}
-            <button onclick="submitForm()" style="background-color: red; border: none; color: white; padding: 5px 10px; border-radius: 5px;">Eliminar</button>
-            <button onclick="closeModal()" style="background-color: #0a6efa; color: white; border: none; padding: 5px 10px; border-radius: 5px;" type= "button">Cancelar</button>
-        </form>
+            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+          </form>
+        </div>
+      </div>
     </div>
-</div> 
+  </div>
 
 <script>
     function viewComment(button, url){
@@ -76,59 +90,18 @@
         document.getElementById("show_text").innerText = button.dataset.text
         document.getElementById("show").style.display = 'block'
         document.getElementById("deleteForm").action = url
+
+        document.getElementById('deleteModalTitle').innerText = title;
     }
 
-    function deleteComment(url){
+    function deleteComment(url, title){
         document.getElementById("deleteForm").action = url
-        openModal()
-    }
-
-    function openModal() {
-        const modal = document.getElementById('deleteModal');
-        const form = document.getElementById('deleteForm');
-        modal.style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('deleteModal').style.display = 'none';
-    }
-
-    function submitForm() {
-        document.getElementById('comment-delete').submit();
+        document.getElementById('deleteModalTitle').innerText = title;
+        confirmDelete()
     }
     
+    function confirmDelete() {
+        new bootstrap.Modal(document.getElementById('modalDelete')).show();
+    }
 </script>
-<style>
-    #deleteModal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    }
-    
-    .modal-content {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        width: 300px;
-        max-width: 90%;
-        box-shadow: 0 0 15px rgba(0,0,0,0.3);
-        position: relative;
-    }
-
-    .close {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-</style>
 {% endblock %}

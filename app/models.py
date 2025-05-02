@@ -82,6 +82,17 @@ class Category(models.Model):
         self.is_deleted = True
         self.save()
 
+class Venue(models.Model):
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    capacity = models.PositiveIntegerField()
+    contact = models.CharField(max_length=100)
+    isDeleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+    
 class Event(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -90,6 +101,7 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, related_name="events")
+    venue = models.ForeignKey(Venue, on_delete=models.SET_NULL, null=True, blank=True, related_name="events")
 
     def __str__(self):
         return self.title
@@ -107,7 +119,7 @@ class Event(models.Model):
         return errors
 
     @classmethod
-    def new(cls, title, description, scheduled_at, organizer, category):
+    def new(cls, title, description, scheduled_at, organizer, category, venue):
         errors = Event.validate(title, description, scheduled_at)
 
         if len(errors.keys()) > 0:
@@ -119,16 +131,18 @@ class Event(models.Model):
             scheduled_at=scheduled_at,
             organizer=organizer,
             category=category,
+            venue=venue,
         )
 
         return True, None
 
-    def update(self, title, description, scheduled_at, organizer, category):
+    def update(self, title, description, scheduled_at, organizer, category, venue):
         self.title = title or self.title
         self.description = description or self.description
         self.scheduled_at = scheduled_at or self.scheduled_at
         self.organizer = organizer or self.organizer
         self.category = category or self.category
+        self.venue = venue or self.venue
 
         self.save()
 
@@ -363,3 +377,7 @@ class Comment(models.Model):
         self.isDeleted = True
         self.save()
     
+
+
+
+
