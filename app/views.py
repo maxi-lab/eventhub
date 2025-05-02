@@ -264,7 +264,7 @@ def notifications_delete(request, pk):
 
 
 @login_required
-def notifications_create_edit(request, pk=None):
+def notifications_form(request, pk=None):
     if pk:
         notification = get_object_or_404(Notification, pk=pk)
         is_edit = True
@@ -318,7 +318,7 @@ def notifications_create_edit(request, pk=None):
 
         return redirect('notifications_organizer')
 
-    return render(request, 'app/notifications_create_edit.html', {
+    return render(request, 'app/notifications_form.html', {
         'notification': notification,
         'is_edit': is_edit,
         'events': Event.objects.all(),
