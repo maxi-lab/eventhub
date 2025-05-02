@@ -123,6 +123,7 @@ def event_form(request, id=None):
         date = request.POST.get("date")
         time = request.POST.get("time")
         category = get_object_or_404(Category, pk=request.POST.get("category"))
+        venue = get_object_or_404(Venue, pk=request.POST.get("venue"))
 
         [year, month, day] = date.split("-")
         [hour, minutes] = time.split(":")
@@ -132,10 +133,10 @@ def event_form(request, id=None):
         )
 
         if id is None:
-            Event.new(title, description, scheduled_at, request.user, category)
+            Event.new(title, description, scheduled_at, request.user, category, venue)
         else:
             event = get_object_or_404(Event, pk=id)
-            event.update(title, description, scheduled_at, request.user, category)
+            event.update(title, description, scheduled_at, request.user, category, venue)
 
         return redirect("events")
 
@@ -144,10 +145,17 @@ def event_form(request, id=None):
         event = get_object_or_404(Event, pk=id)
 
     categories = Category.objects.filter(is_active=True)
+    venues = Venue.objects.filter(isDeleted=False)
+
     return render(
         request,
         "app/event_form.html",
-        {"event": event, "user_is_organizer": request.user.is_organizer, "categories":categories},
+        {
+            "event": event,
+            "user_is_organizer": request.user.is_organizer,
+            "categories": categories,
+            "venues": venues,
+        },
     )
 
 @login_required

@@ -59,16 +59,16 @@
                             </div>
                             <div>
                                 <div class="form-group">
-                                    <label for="exampleFormControlSelect1">Categoría</label>
+                                    <label for="category" class="form-label">Categoría</label>
                                     <select 
                                         class="form-control" 
                                         id="category"
                                         required=""
                                         name="category"
                                     >
-                                    <option 
-                                        disabled 
-                                        {% if not category.id %}
+                                        <option 
+                                            disabled 
+                                            {% if not category.id %}
                                                 selected 
                                             {% endif %}
                                             value
@@ -79,16 +79,48 @@
                                                 {% if category.id and event.category.id == category.id %}
                                                     selected
                                                 {% endif %}
-                                                value="{{category.id}}"
+                                                value="{{ category.id }}"
                                             >
-                                                {{category.name}}
+                                                {{ category.name }}
                                             </option>
                                         {% endfor %}
                                     </select>
                                 </div>
                             </div>
                             <div>
-                                <button type="submit" class="btn btn-primary">Crear Evento</button>
+                                <div class="form-group">
+                                    <label for="venue" class="form-label">Lugar</label>
+                                    <select
+                                        class="form-control"
+                                        id="venue"
+                                        required=""
+                                        name="venue"
+                                    >
+                                        <option 
+                                            disabled
+                                            {% if not event.venue %}
+                                                selected 
+                                            {% endif %}
+                                            value
+                                        >Seleccione un lugar</option>
+
+                                        {% for venue in venues %}
+                                            <option
+                                                {% if venue.id and event.venue.id == venue.id %}
+                                                    selected
+                                                {% endif %}
+                                                value="{{ venue.id }}"
+                                            >
+                                                {{ venue.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    {% if event.id %} Actualizar Evento {% else %} Crear Evento {% endif %}
+                                </button>
                             </div>
                         </div>
                     </form>
