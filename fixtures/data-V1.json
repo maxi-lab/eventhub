@@ -1,0 +1,139 @@
+[
+    {
+        "model": "app.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$1000000$YpkGhySpZdipmaMNzRkSmJ$jLSyGkRjdkBvJ1z6J7GdV4uYRfU91NPurNeWYZJFg3U=",
+            "last_login": "2025-05-02T18:06:42.157Z",
+            "is_superuser": false,
+            "username": "admin",
+            "first_name": "",
+            "last_name": "",
+            "email": "admin@admin",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2025-05-02T18:06:41.387Z",
+            "is_organizer": true,
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "app.user",
+        "pk": 2,
+        "fields": {
+            "password": "pbkdf2_sha256$1000000$5qWrO0TIlpSrnKuoBM7gBo$ayThUTD6yha6Yrz+2cLvtbsx/fsYDUJU1OQhzbmoQEY=",
+            "last_login": "2025-05-02T18:13:15.824Z",
+            "is_superuser": false,
+            "username": "user",
+            "first_name": "",
+            "last_name": "",
+            "email": "user@user.com",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2025-05-02T18:13:15.194Z",
+            "is_organizer": false,
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "app.category",
+        "pk": 1,
+        "fields": {
+            "name": "M�sica",
+            "description": "afdroigujsofi",
+            "is_active": true,
+            "is_deleted": false
+        }
+    },
+    {
+        "model": "app.venue",
+        "pk": 1,
+        "fields": {
+            "name": "El bar de la esquina",
+            "address": "callefalsa 123",
+            "city": "Quilmes",
+            "capacity": 61,
+            "contact": "1924u1492",
+            "isDeleted": false
+        }
+    },
+    {
+        "model": "app.event",
+        "pk": 1,
+        "fields": {
+            "title": "Test",
+            "description": "Lorem ipsum",
+            "scheduled_at": "2025-12-25T22:00:00Z",
+            "organizer": 1,
+            "created_at": "2025-05-02T18:09:40.451Z",
+            "updated_at": "2025-05-02T18:09:40.451Z",
+            "category": 1,
+            "venue": 1
+        }
+    },
+    {
+        "model": "app.event",
+        "pk": 2,
+        "fields": {
+            "title": "Test test",
+            "description": "Lorem ipsum",
+            "scheduled_at": "2025-12-25T10:00:00Z",
+            "organizer": 1,
+            "created_at": "2025-05-02T18:11:41.966Z",
+            "updated_at": "2025-05-02T18:11:41.966Z",
+            "category": 1,
+            "venue": 1
+        }
+    },
+    {
+        "model": "app.ticket",
+        "pk": 1,
+        "fields": {
+            "buy_date": "2025-05-02T18:16:07.135Z",
+            "type_ticket": "VIP",
+            "code": "tM6Y2DbRc8",
+            "event": 1,
+            "user": 2,
+            "is_deleted": false,
+            "quantity": 2
+        }
+    },
+    {
+        "model": "app.refundrequest",
+        "pk": 1,
+        "fields": {
+            "ticket": 1,
+            "approval_date": null,
+            "created_at": "2025-05-02T18:17:11.668Z",
+            "reason": "Pinch� una rueda",
+            "status": "PENDING",
+            "is_deleted": false
+        }
+    },
+    {
+        "model": "app.comment",
+        "pk": 1,
+        "fields": {
+            "title": "Primer comentario",
+            "text": "Prueba de comentario",
+            "created_at": "2025-05-02T18:09:57.004Z",
+            "event": 1,
+            "user": 1,
+            "isDeleted": false
+        }
+    },
+    {
+        "model": "app.comment",
+        "pk": 2,
+        "fields": {
+            "title": "Otro comentario!",
+            "text": "Otro usuario comenta :D",
+            "created_at": "2025-05-02T18:14:06.941Z",
+            "event": 1,
+            "user": 2,
+            "isDeleted": false
+        }
+    }
+]
