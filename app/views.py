@@ -1,4 +1,5 @@
 import datetime
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
@@ -233,7 +234,7 @@ def notifications_organizer(request):
     events = Event.objects.all()
     event_filter = request.GET.get('event', '')
     priority_filter = request.GET.get('priority', '')
-    search_filter = request.GET.get('search', '')
+    search_filter = request.GET.get('title', '')
 
     notifications = Notification.objects.filter(is_deleted=False)
 
@@ -279,6 +280,19 @@ def notifications_create_edit(request, pk=None):
         recipients_type = request.POST.get('recipients') 
         user_id = request.POST.get('user')
 
+        if not title or not message:
+            messages.error(request, "Título y mensaje son obligatorios.")
+            return redirect(request.path)
+
+        if not is_edit:
+            if recipients_type == 'all' and not event_id:
+                messages.error(request, "Debes seleccionar un evento si deseas notificar a todos los asistentes.")
+                return redirect(request.path)
+
+            if recipients_type == 'user' and not user_id:
+                messages.error(request, "Debes seleccionar un usuario específico.")
+                return redirect(request.path)
+
         event = get_object_or_404(Event, pk=event_id) if event_id else None
 
         if is_edit:
@@ -296,8 +310,6 @@ def notifications_create_edit(request, pk=None):
 
             if recipients_type == 'all':
                 users = User.objects.filter(tickets__event=event).distinct()
-                if not users:
-                    users = []
             else:
                 users = [get_object_or_404(User, pk=user_id)]
 
@@ -312,6 +324,7 @@ def notifications_create_edit(request, pk=None):
         'events': Event.objects.all(),
         'users': User.objects.all(),
     })
+
     
 def tickets(request):
     user=request.user

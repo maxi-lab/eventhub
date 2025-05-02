@@ -3,6 +3,16 @@
 {% block content %}
 <div class="container">
     <h1 class="mb-4">{% if is_edit %}Editar{% else %}Crear{% endif %} Notificación</h1>
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
     <div class="row">
         <div class="col-md-8 card shadow-sm p-3">
             <form method="POST">
@@ -91,4 +101,5 @@
         </div>
     </div>
 </div>
+    
 {% endblock %}
