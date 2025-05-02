@@ -22,11 +22,9 @@
 </head>
 
 <body>
-    <!-- Navbar solo visible si el usuario está autenticado -->
     <nav class="navbar navbar-expand-md bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">EventHub</a>
-
             <div class="hstack gap-2">
                 {% if user.is_authenticated %}
                     <button
@@ -41,10 +39,7 @@
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <div
-                        class="collapse navbar-collapse"
-                        id="navbar-content"
-                    >
+                    <div class="collapse navbar-collapse" id="navbar-content">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
                                 {% navbar_link 'events' 'Eventos' %}
@@ -55,6 +50,16 @@
                             <li class="nav-item">
                                 {% navbar_link 'my_refund_requests' 'Solicitudes de Reembolso' %}
                             </li>
+                    
+                            {% if not user.is_organizer %}
+                                <li class="nav-item position-relative">
+                                    {% navbar_link 'notifications_user' '<i class="bi bi-bell position-absolute top-50 start-50 translate-middle"></i>' %}
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    {% navbar_link 'notifications_organizer' 'Notificaciones' %}
+                                </li>
+                            {% endif %}
                         </ul>
                     </div>
 

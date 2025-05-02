@@ -11,6 +11,13 @@
                 Comprar ticket
             {% endif %}
         </h1>
+        
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endif %}
+        
         <form action="{% if ticket.id %} {% url 'ticket_edit' ticket.id %} {% else %} {% url 'ticket_form' %} {% endif %}" method="POST">
             {% csrf_token %}
             <div class="vstack gap-3">

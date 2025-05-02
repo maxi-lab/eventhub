@@ -77,6 +77,33 @@ class Event(models.Model):
 
         self.save()
 
+
+class Priority(models.TextChoices):
+    HIGH = "HIGH", "Alta"
+    MEDIUM = "MEDIUM", "Media"
+    LOW = "LOW", "Baja"
+
+class Notification(models.Model):
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted=models.BooleanField(default=False)
+    priority = models.CharField(
+        max_length=10,
+        choices=Priority.choices,
+        default=Priority.MEDIUM,
+    )
+    users = models.ManyToManyField(User, through='UserNotification', related_name="notifications")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="notifications", null=True, blank=True)
+
+class UserNotification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user', 'notification')
+
 class Ticket(models.Model):
     GENERAL="GRL"
     VIP="VIP"
@@ -227,3 +254,52 @@ class RefundRequest(models.Model):
         self.approval_date = timezone.now()
         self.save()
         return True, None
+
+class Comment(models.Model):
+    title = models.TextField(max_length=50)
+    text = models.TextField(max_length=300)
+    created_at = models.DateTimeField(auto_now_add=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="published_comments")
+    isDeleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.title} by {self.user.username}"
+
+    @classmethod
+    def validate(cls, title, text, user_id, event_id):
+        errors = {}
+        if not title:
+            errors ["title"] = "El título es requerido"
+        if not text:
+            errors ["text"] = "El cuerpo es requerido"
+        if not User.objects.filter(id=user_id).exists():
+            errors ["user"] = "El usuario no existe"
+        if not Event.objects.filter(id=event_id).exists():
+            errors ["event"] = "El evento no existe"
+        return errors
+
+    @classmethod
+    def new(cls, title, text, user_id, event_id):
+        errors=Comment.validate(title, text, user_id, event_id)
+
+        if len(errors.keys()) > 0:
+            return False, errors
+        
+        Comment.objects.create(
+            title=title,
+            text=text,
+            user=User.objects.get(id = user_id),
+            event=Event.objects.get(id = event_id),
+        )
+        return True, None
+    
+    def Update(self, title, text):
+        self.title = title or self.title
+        self.text = text or self.text
+        self.save()
+    
+    def delete(self):
+        self.isDeleted = True
+        self.save()
+    

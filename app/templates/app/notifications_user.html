@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">
+        Notificaciones 
+        {% if new_count > 0 %}
+        <span class="badge bg-danger">
+            {{ new_count }} {% if new_count == 1 %}Nueva{% else %}nuevas{% endif %}
+        </span>
+        {% endif %}
+        <form method="post" action="{% url 'notifications_mark_all_read' %}" class="d-inline float-end">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary btn-sm">Marcar todas como leídas</button>
+        </form>
+    </h2>
+
+    <div class="list-group">
+        {% for user_notification in user_notifications %}
+            {% with notification=user_notification.notification %}
+                <div class="list-group-item py-3 {% if not user_notification.is_read %}bg-light{% endif %}">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="mb-1 text-primary">
+                                <i class="bi bi-bell"></i>
+                                {{ notification.title }}
+                                {% if not user_notification.is_read %}
+                                    <span class="badge bg-primary">Nueva</span>
+                                {% endif %}
+                            </h5>
+                            <p class="mb-1">{{ notification.message }}</p>
+                            <small class="text-muted">{{ notification.created_at|date:"d M Y, H:i" }}</small>
+                        </div>
+                        {% if not user_notification.is_read %}
+                            <form method="post" action="{% url 'notificationsMarkRead' user_notification.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Marcar como leída</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endwith %}
+        {% empty %}
+            <div class="alert alert-info">No tienes notificaciones.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

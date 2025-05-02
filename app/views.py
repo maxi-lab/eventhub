@@ -4,10 +4,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.http import HttpResponseServerError
-from .models import RefundRequest
-from .models import Event, User, Ticket
+from .models import Event, User, Comment, Ticket, RefundRequest
 from django.http import HttpResponseForbidden
 
+from .models import Event, User, UserNotification, Notification
 
 def is_admin(user):
     return user.is_organizer
@@ -69,14 +69,18 @@ def events(request):
     return render(
         request,
         "app/events.html",
-        {"events": events, "user_is_organizer": request.user.is_organizer},
+        {"events": events, "user_is_organizer": request.user.is_organizer, "user_id": request.user.id},
     )
 
 
 @login_required
 def event_detail(request, id):
     event = get_object_or_404(Event, pk=id)
-    return render(request, "app/event_detail.html", {"event": event, "user_is_organizer": request.user.is_organizer})
+    user_comments = Comment.objects.filter(event = event, user = request.user).exclude(isDeleted = True)
+    other_comments = Comment.objects.filter(event = event, isDeleted=False).exclude(user = request.user)
+    comments_count = user_comments.count() + other_comments.count()
+
+    return render(request, "app/event_detail.html", {"event": event, "user_comments": user_comments, "other_comments": other_comments, "comments_count": comments_count, "user_is_organizer": request.user.is_organizer})
 
 
 @login_required
@@ -139,8 +143,191 @@ def event_form(request, id=None):
         {"event": event, "user_is_organizer": request.user.is_organizer},
     )
 
+@login_required
+def save_comment(request, id):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        text = request.POST.get('text')
+        event = get_object_or_404(Event, id=id)
+
+        Comment.objects.create(
+            title=title,
+            text=text,
+            user=request.user,
+            event=event,
+        )
+        return redirect('event_detail', id=id)
+    return redirect('events')
+
+@login_required
+def edit_comment(request, id):
+    comment = get_object_or_404(Comment, id = id, user = request.user)
+
+    if (request.method == "POST"):
+        comment.title = request.POST.get('title') or comment.title
+        comment.text = request.POST.get('text') or comment.text
+        comment.save()
+        return redirect('event_detail', id=comment.event.id)
+    return redirect('event_detail', id=comment.event.id)
+
+@login_required
+def delete_comment(request, id):
+    comment =get_object_or_404(Comment, id = id, user = request.user)
+
+    if (request.method == "POST"):
+        comment.isDeleted = True
+        comment.save()
+        return redirect('event_detail', id=comment.event.id)
+    return redirect('event_detail', id=comment.event.id)
+
+@login_required
+def admin_delete_comment(request, id):
+    comment =get_object_or_404(Comment, id = id)
+
+    if (request.method == "POST"):
+        comment.isDeleted = True
+        comment.save()
+        return redirect('admin_comments')
+    return redirect('admin_comments')
+
+@login_required
+def admin_comments(request):
+    events = Event.objects.filter(organizer = request.user)
+    admin_comments = []
+    for event in events:
+        comments = Comment.objects.filter(isDeleted = False, event=event)
+        admin_comments.extend(comments)
+    return render(
+    request,
+    "app/comments.html",
+    {"admin_comments": admin_comments},
+)
+def mark_all_notifications_read(request):
+    if request.method == 'POST':
+        UserNotification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return redirect('notifications_user')
+
+@login_required
+def mark_notification_read(request, pk):
+    notif = get_object_or_404(UserNotification, pk=pk, user=request.user)
+    notif.is_read = True
+    notif.save()
+    return redirect('notifications_user')
+
+@login_required
+def notifications_user(request):
+    user_notifications = UserNotification.objects.filter(
+        user=request.user,
+        notification__is_deleted=False
+    ).select_related('notification').order_by('-notification__created_at')
+
+    new_count = user_notifications.filter(is_read=False).count()
+
+    return render(request, 'app/notifications_user.html', {
+        'user_notifications': user_notifications,
+        'new_count': new_count,
+    })
+
+@login_required
+def notifications_organizer(request):
+    events = Event.objects.all()
+    event_filter = request.GET.get('event', '')
+    priority_filter = request.GET.get('priority', '')
+    search_filter = request.GET.get('search', '')
+
+    notifications = Notification.objects.filter(is_deleted=False)
+
+    if event_filter:
+        notifications = notifications.filter(event__id=event_filter)
+
+    if priority_filter:
+        notifications = notifications.filter(priority=priority_filter)
+
+    if search_filter:
+        notifications = notifications.filter(title__icontains=search_filter)
+
+    return render(request, "app/notifications_organizer.html", {
+        "notifications": notifications,
+        "events": events,
+        "selected_event": event_filter,
+        "selected_priority": priority_filter,
+        "search_filter": search_filter
+    })
+
+@login_required
+def notifications_delete(request, pk):
+    notification = get_object_or_404(Notification, pk=pk)
+    notification.is_deleted = True
+    notification.save()
+    return redirect('notifications_organizer')
+
+
+@login_required
+def notifications_create_edit(request, pk=None):
+    if pk:
+        notification = get_object_or_404(Notification, pk=pk)
+        is_edit = True
+    else:
+        notification = None
+        is_edit = False
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        message = request.POST.get('message')
+        event_id = request.POST.get('event')
+        priority = request.POST.get('priority')
+        recipients_type = request.POST.get('recipients') 
+        user_id = request.POST.get('user')
+
+        event = get_object_or_404(Event, pk=event_id) if event_id else None
+
+        if is_edit:
+            notification.title = title
+            notification.message = message
+            notification.priority = priority
+            notification.save()
+        else:
+            notification = Notification.objects.create(
+                title=title,
+                message=message,
+                event=event,
+                priority=priority
+            )
+
+            if recipients_type == 'all':
+                users = User.objects.filter(tickets__event=event).distinct()
+                if not users:
+                    users = []
+            else:
+                users = [get_object_or_404(User, pk=user_id)]
+
+            for user in users:
+                UserNotification.objects.create(user=user, notification=notification)
+
+        return redirect('notifications_organizer')
+
+    return render(request, 'app/notifications_create_edit.html', {
+        'notification': notification,
+        'is_edit': is_edit,
+        'events': Event.objects.all(),
+        'users': User.objects.all(),
+    })
+    
 def tickets(request):
-    tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
+    user=request.user
+    
+    if user.is_organizer:
+        events = Event.objects.filter(organizer=user).order_by("scheduled_at")
+        tickets = Ticket.objects.filter(is_deleted=False).order_by("buy_date")
+        print(tickets)
+        for t in tickets:
+            if t.event not in events:
+                tickets=tickets.exclude(pk=t.pk)
+                
+    else:
+        tickets = Ticket.objects.filter(is_deleted=False,user=user).order_by("buy_date")
+
+    
     tipo=Ticket.TICKET_TYPES
     return render(request, "app/tickets.html", {"tickets": tickets, "tipo": tipo})
 
@@ -156,10 +343,15 @@ def ticket_form(request,id=None):
         event_id=request.POST.get("event_id")
         quantity=int(request.POST.get("quantity"))
         if quantity < 1:
-            return HttpResponseServerError("Error 500.La cantidad de tickets debe ser mayor a 0")
-        if len(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))!=0:
-            print(verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
-            return HttpResponseServerError(verify_card(request.POST.get("number"),request.POST.get("expiration_date"),request.POST.get("cvv")))
+            return render(request,'app/ticket_form.html',{"events":events,"ticket":ticket,"error":"La cantidad de tickets debe ser mayor a 0"})
+        card=verify_card(request.POST.get("card_number"),request.POST.get("expiration_date"),request.POST.get("cvv"))
+        if len(card)!=0:
+            
+            e=''
+            for i in card:
+                e=e+' '+card[i]
+            
+            return render(request,'app/ticket_form.html',{"events":events,"ticket":ticket,"error":e})
         
         event=get_object_or_404(Event, pk=event_id)
         if id is None:
