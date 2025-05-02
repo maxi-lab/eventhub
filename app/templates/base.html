@@ -70,8 +70,9 @@
                             <li class="nav-item">
                                 {% navbar_link 'categories' 'Categorías' %}
                             <li class="nav-item">
-                                {% navbar_link 'list_venues' 'Lugares' %}
-
+                                {% if user.is_organizer %}
+                                    {% navbar_link 'list_venues' 'Lugares' %}
+                                {% endif %}
                             </li>
                         </ul>
                     </div>
