@@ -93,10 +93,22 @@ class Venue(models.Model):
     def __str__(self):
         return self.name
     
+class EventState(models.TextChoices):
+    ACTIVE="ACTIVO","Activo"
+    CANCELED="CANCELADO","Cancelado"
+    RESCHEDULED="REPROGRAMADO","Reprogramado"
+    SOLD_OUT="AGOTADO","Agotado"
+    FINISHED="TERMINADO","Terminado"
+
 class Event(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     scheduled_at = models.DateTimeField()
+    state=models.CharField(
+        max_length=50,
+        choices=EventState.choices,
+        default=EventState.ACTIVE
+    )
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="organized_events")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
