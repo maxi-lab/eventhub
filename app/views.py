@@ -113,6 +113,7 @@ def event_tickets(request,id):
 @login_required
 def event_form(request, id=None):
     user = request.user
+    
 
     if not user.is_organizer:
         return redirect("events")
@@ -136,7 +137,9 @@ def event_form(request, id=None):
             Event.new(title, description, scheduled_at, request.user, category, venue)
         else:
             event = get_object_or_404(Event, pk=id)
-            event.update(title, description, scheduled_at, request.user, category, venue)
+            state=request.POST.get("state")
+            print(state)
+            event.update(title, description, scheduled_at, request.user, category, venue,state)
 
         return redirect("events")
 

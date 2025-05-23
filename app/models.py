@@ -148,13 +148,14 @@ class Event(models.Model):
 
         return True, None
 
-    def update(self, title, description, scheduled_at, organizer, category, venue):
+    def update(self, title, description, scheduled_at, organizer, category, venue, state):
         self.title = title or self.title
         self.description = description or self.description
         self.scheduled_at = scheduled_at or self.scheduled_at
         self.organizer = organizer or self.organizer
         self.category = category or self.category
         self.venue = venue or self.venue
+        self.state=state or self.state
 
         self.save()
 

@@ -60,6 +60,18 @@
                                         value="{{ event.scheduled_at|date:'g:i'}}"
                                         name="time" />
                                 </div>
+                                {% if event.id %}
+                                <div class="col-md-6">
+                                    <label for="state" class="form-label">Estado</label>
+                                    <select name="state" id="state">
+                                        <option value="ACTIVO">Activo</option>
+                                        <option value="CANCELADO">Cancelado</option>
+                                        <option value="REPROGRAMADO">Reprogramado</option>
+                                        <option value="AGOTADO">Agotado</option>
+                                        <option value="FINALIZADO">Finalizado</option>
+                                    </select>
+                                </div>
+                                {% endif %}
                             </div>
                             <div>
                                 <div class="form-group">
