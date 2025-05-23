@@ -361,7 +361,7 @@ def tickets(request):
 
 def ticket_form(request,id=None):
     ticket = {}
-    events = Event.objects.all()
+    events = Event.objects.exclude(state="FINALIZADO")
     user=request.user
     if id is not None:
         ticket=get_object_or_404(Ticket, pk=id)
