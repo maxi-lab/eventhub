@@ -4,7 +4,7 @@ import re
 from django.utils import timezone
 from playwright.sync_api import expect
 
-from app.models import Event, User
+from app.models import Event, User, Category, Venue
 
 from app.test.test_e2e.base import BaseE2ETest
 
@@ -22,7 +22,17 @@ class EventBaseTest(BaseE2ETest):
             password="password123",
             is_organizer=True,
         )
-
+        self.category=Category.objects.create(
+            name="Test",
+            description="Test Category"
+        )
+        self.venue=Venue.objects.create(
+            name="Test",
+            address="Test",
+            city="Test",
+            capacity=100,
+            contact="test"
+        )
         # Crear usuario regular
         self.regular_user = User.objects.create_user(
             username="usuario",
@@ -39,6 +49,8 @@ class EventBaseTest(BaseE2ETest):
             description="Descripción del evento 1",
             scheduled_at=event_date1,
             organizer=self.organizer,
+            venue=self.venue,
+            category=self.category
         )
 
         # Evento 2
@@ -48,6 +60,8 @@ class EventBaseTest(BaseE2ETest):
             description="Descripción del evento 2",
             scheduled_at=event_date2,
             organizer=self.organizer,
+            venue=self.venue,
+            category=self.category
         )
 
     def _table_has_event_info(self):
@@ -57,7 +71,9 @@ class EventBaseTest(BaseE2ETest):
         expect(headers.nth(0)).to_have_text("Título")
         expect(headers.nth(1)).to_have_text("Descripción")
         expect(headers.nth(2)).to_have_text("Fecha")
-        expect(headers.nth(3)).to_have_text("Acciones")
+        expect(headers.nth(3)).to_have_text("Estado")
+        expect(headers.nth(4)).to_have_text("Categoría")
+        expect(headers.nth(5)).to_have_text("Acciones")
 
         # Verificar que los eventos aparecen en la tabla
         rows = self.page.locator("table tbody tr")
@@ -68,11 +84,15 @@ class EventBaseTest(BaseE2ETest):
         expect(row0.locator("td").nth(0)).to_have_text("Evento de prueba 1")
         expect(row0.locator("td").nth(1)).to_have_text("Descripción del evento 1")
         expect(row0.locator("td").nth(2)).to_have_text("10 feb 2025, 10:10")
+        expect(row0.locator("td").nth(3)).to_have_text("ACTIVO")
+        expect(row0.locator("td").nth(4)).to_have_text("Test")
 
         # Verificar datos del segundo evento
         expect(rows.nth(1).locator("td").nth(0)).to_have_text("Evento de prueba 2")
         expect(rows.nth(1).locator("td").nth(1)).to_have_text("Descripción del evento 2")
         expect(rows.nth(1).locator("td").nth(2)).to_have_text("15 mar 2025, 14:30")
+        expect(rows.nth(1).locator("td").nth(3)).to_have_text("ACTIVO")
+        expect(rows.nth(1).locator("td").nth(4)).to_have_text("Test")
 
     def _table_has_correct_actions(self, user_type):
         """Método auxiliar para verificar que las acciones son correctas según el tipo de usuario"""
@@ -287,6 +307,7 @@ class EventCRUDTest(EventBaseTest):
         expect(row.locator("td").nth(0)).to_have_text("Titulo editado")
         expect(row.locator("td").nth(1)).to_have_text("Descripcion Editada")
         expect(row.locator("td").nth(2)).to_have_text("20 abr 2025, 03:00")
+
 
     def test_delete_event_organizer(self):
         """Test que verifica la funcionalidad de eliminar un evento para organizadores"""
