@@ -3,7 +3,7 @@ import datetime
 from django.test import TestCase
 from django.utils import timezone
 
-from app.models import Event, User
+from app.models import Event, User,Category,Venue
 
 
 class EventModelTest(TestCase):
@@ -14,6 +14,19 @@ class EventModelTest(TestCase):
             password="password123",
             is_organizer=True,
         )
+        self.category=Category.objects.create(
+            name="category_test",
+            description="categoria de prueba"
+        )
+        self.venue=Venue.objects.create(
+            name="Test",
+            address="Test",
+            city="Test",
+            capacity=100,
+            contact="Test"
+        )
+        self.state="ACTIVO"
+
 
     def test_event_creation(self):
         event = Event.objects.create(
@@ -57,6 +70,8 @@ class EventModelTest(TestCase):
             description="Descripción del nuevo evento",
             scheduled_at=scheduled_at,
             organizer=self.organizer,
+            venue=None,
+            category=None
         )
 
         self.assertTrue(success)
@@ -78,6 +93,8 @@ class EventModelTest(TestCase):
             description="Descripción del evento",
             scheduled_at=scheduled_at,
             organizer=self.organizer,
+            venue=self.venue,
+            category=self.category
         )
 
         self.assertFalse(success)
@@ -97,6 +114,8 @@ class EventModelTest(TestCase):
             description="Descripción del evento de prueba",
             scheduled_at=timezone.now() + datetime.timedelta(days=1),
             organizer=self.organizer,
+            venue=self.venue,
+            category=self.category
         )
 
         event.update(
@@ -104,6 +123,9 @@ class EventModelTest(TestCase):
             description=new_description,
             scheduled_at=new_scheduled_at,
             organizer=self.organizer,
+            category=self.category,
+            venue=self.venue,
+            state=self.state
         )
 
         # Recargar el evento desde la base de datos
@@ -131,6 +153,9 @@ class EventModelTest(TestCase):
             description=new_description,
             scheduled_at=None,  # No cambiar
             organizer=None,  # No cambiar
+            category=None, 
+            venue=None,
+            state=None
         )
 
         # Recargar el evento desde la base de datos
