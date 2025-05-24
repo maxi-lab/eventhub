@@ -70,11 +70,27 @@ def home(request):
 
 @login_required
 def events(request):
-    events = Event.objects.all().order_by("scheduled_at")
+    show_past = request.GET.get('show_past', 'false') == 'true'
+    current_date = timezone.now()
+
+    if show_past:
+        events = Event.objects.filter(
+            scheduled_at__lt=current_date
+        ).order_by('-scheduled_at')
+    else:
+        events = Event.objects.filter(
+            scheduled_at__gte=current_date
+        ).order_by('scheduled_at')
+
     return render(
         request,
         "app/events.html",
-        {"events": events, "user_is_organizer": request.user.is_organizer, "user_id": request.user.id},
+        {
+            "events": events,
+            "user_is_organizer": request.user.is_organizer,
+            "user_id": request.user.id,
+            "show_past": show_past,
+        },
     )
 
 

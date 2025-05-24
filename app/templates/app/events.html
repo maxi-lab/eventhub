@@ -5,24 +5,31 @@
 {% block content %}
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Eventos</h1>
-        {% if user_is_organizer %}
-            <a
-                href="{% url 'event_form' %}"
-                class="btn btn-primary"
-                style="margin-left: auto"
-            >
-                <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
-                Crear Evento
+        <h1>
+            {% if show_past %}
+                Eventos pasados
+            {% else %}
+                Eventos
+            {% endif %}
+        </h1>
+        <div class="d-flex gap-2">
+            <a href="?show_past={% if show_past %}false{% else %}true{% endif %}" class="btn btn-primary">
+                {% if show_past %}
+                    <i class="bi bi-clock"></i> Ver eventos actuales
+                {% else %}
+                    <i class="bi bi-clock-history"></i> Ver eventos pasados
+                {% endif %}
             </a>
-            <a
-                href="{% url 'admin_comments'%}"
-                class="btn btn-primary"
-                style="margin-left: 10px"
-            >
-                Comentarios
-            </a>
-        {% endif %}
+            {% if user_is_organizer %}
+                <a href="{% url 'event_form' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
+                    Crear Evento
+                </a>
+                <a href="{% url 'admin_comments'%}" class="btn btn-primary">
+                    Comentarios
+                </a>
+            {% endif %}
+        </div>
     </div>
     <table class="table">
         <thead>
@@ -72,7 +79,13 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">No hay eventos disponibles</td>
+                    <td colspan="5" class="text-center">
+                        {% if show_past %}
+                            No hay eventos pasados
+                        {% else %}
+                            No hay eventos disponibles
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
