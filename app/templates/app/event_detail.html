@@ -71,6 +71,16 @@
                             <h6 class="mb-0">Estado</h6>
                             <p class="mb-0">{{event.state}}</p>
                         </div>
+                        {% if event.state == "CANCELADO" %}
+                        <div>
+                            <p>Este evento ha sido cancelado por cuestiones externas al evento, la empresa se reserva el dercho a reembolsos</p>
+                        </div>
+                        {% endif %}
+                        {% if event.state == "REPROGRAMADO" %}
+                        <div>
+                            <p>Este evento se reprogramó para {{ event.scheduled_at|date:"l, j \\d\\e F \\d\\e Y, H:i" }}</p>
+                        </div>
+                        {% endif %}
                     </div>
                     </div>
                 </div>
