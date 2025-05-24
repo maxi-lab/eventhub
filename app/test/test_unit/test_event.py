@@ -25,7 +25,7 @@ class EventModelTest(TestCase):
             capacity=100,
             contact="Test"
         )
-        self.state="ACTIVO"
+        self.state="CANCELADO"
 
 
     def test_event_creation(self):
@@ -165,3 +165,31 @@ class EventModelTest(TestCase):
         self.assertEqual(updated_event.title, original_title)
         self.assertEqual(updated_event.description, new_description)
         self.assertEqual(updated_event.scheduled_at, original_scheduled_at)
+
+    def test_event_update_state(self):
+        """Testea que se actualize el estado"""
+        event = Event.objects.create(
+            title="Evento de prueba",
+            description="Descripción del evento de prueba",
+            scheduled_at=timezone.now() + datetime.timedelta(days=1),
+            organizer=self.organizer,
+        )
+        original_title = event.title
+        original_description=event.description
+        new_state=self.state
+        original_scheduled_at = event.scheduled_at
+        event.update(
+            title=None,  
+            description=None,
+            scheduled_at=None, 
+            organizer=None,  
+            category=None, 
+            venue=None,
+            state=self.state
+        )
+        updated_event = Event.objects.get(pk=event.pk)
+        self.assertEqual(updated_event.title, original_title)
+        self.assertEqual(updated_event.description,original_description)
+        self.assertEqual(updated_event.state, new_state)
+        self.assertEqual(updated_event.scheduled_at, original_scheduled_at)
+        
