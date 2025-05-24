@@ -21,22 +21,22 @@
                     <label for="title" class="form-label">Título de la notificación *</label>
                     <input type="text" class="form-control" id="title" name="title"
                            placeholder="Ej: Cambio de horario del evento"
-                           value="{{ notification.title|default_if_none:'' }}">
+                           value="{{ form_data.title|default:'' }}">
                 </div>
 
                 <div class="mb-3">
                     <label for="message" class="form-label">Mensaje *</label>
                     <textarea class="form-control" id="message" name="message" rows="4"
-                              placeholder="Escribe el contenido de la notificación...">{{ notification.message|default_if_none:'' }}</textarea>
+                              placeholder="Escribe el contenido de la notificación...">{{ form_data.message|default:'' }}</textarea>
                 </div>
 
                 {% if not is_edit %}
                     <div class="mb-3">
                         <label for="event" class="form-label">Evento relacionado *</label>
                         <select class="form-select" id="event" name="event">
-                            <option value="" {% if not notification or not notification.event %}selected{% endif %}>Sin evento relacionado</option>
+                            <option value="">Sin evento relacionado</option>
                             {% for event in events %}
-                                <option value="{{ event.id }}">
+                                <option value="{{ event.id }}" {% if form_data.event == event.id %}selected{% endif %}>
                                     {{ event.title }}
                                 </option>
                             {% endfor %}
@@ -45,13 +45,15 @@
                     <div class="mb-3">
                         <label class="form-label">Destinatarios *</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="recipients" id="all" value="all">
+                            <input class="form-check-input" type="radio" name="recipients" id="all" value="all"
+                                   {% if form_data.recipients == 'all' %}checked{% endif %}>
                             <label class="form-check-label" for="all">
                                 Todos los asistentes del evento
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="recipients" id="user" value="user" checked>
+                            <input class="form-check-input" type="radio" name="recipients" id="user" value="user"
+                                   {% if form_data.recipients != 'all' %}checked{% endif %}>
                             <label class="form-check-label" for="user">
                                 Usuario específico
                             </label>
@@ -60,7 +62,9 @@
                             <select class="form-select" id="userSelect" name="user">
                                 <option selected disabled>Selecciona un usuario</option>
                                 {% for user in users %}
-                                    <option value="{{ user.id }}">{{ user.username }}</option>
+                                    <option value="{{ user.id }}" {% if form_data.user == user.id %}selected{% endif %}>
+                                        {{ user.username }}
+                                    </option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -70,9 +74,9 @@
                 <div class="mb-3">
                     <label for="priority" class="form-label">Prioridad</label>
                     <select class="form-select" id="priority" name="priority">
-                        <option value="Baja" {% if notification.priority == 'Baja' %}selected{% endif %}>Baja</option>
-                        <option value="Media" {% if notification.priority == 'Media' %}selected{% endif %}>Media</option>
-                        <option value="Alta" {% if notification.priority == 'Alta' %}selected{% endif %}>Alta</option>
+                        <option value="Baja" {% if form_data.priority == 'Baja' %}selected{% endif %}>Baja</option>
+                        <option value="Media" {% if form_data.priority == 'Media' or not form_data.priority %}selected{% endif %}>Media</option>
+                        <option value="Alta" {% if form_data.priority == 'Alta' %}selected{% endif %}>Alta</option>
                     </select>
                 </div>                
 
