@@ -10,9 +10,11 @@ from django.http import HttpResponseForbidden
 from .models import RefundRequest
 from .models import Event, User, Ticket, Venue
 from django.http import HttpResponseForbidden, HttpResponse
-from .models import Event, User, UserNotification, Notification
+from .models import Event, User, UserNotification, Notification, FavoriteEvent
 from .models import Category
 from django.db.models import Count
+from django.urls import reverse
+
 
 def is_admin(user):
     return user.is_organizer
@@ -70,13 +72,28 @@ def home(request):
 
 @login_required
 def events(request):
-    events = Event.objects.all().order_by("scheduled_at")
+    show_favorites = request.GET.get("favorites") == "1"
+
+    if show_favorites:
+        favorite_event_ids = FavoriteEvent.objects.filter(user=request.user).values_list("event_id", flat=True)
+        events = Event.objects.filter(id__in=favorite_event_ids).order_by("scheduled_at")
+    else:
+        events = Event.objects.all().order_by("scheduled_at")
+
+    user_favorites = set(
+        FavoriteEvent.objects.filter(user=request.user).values_list("event_id", flat=True)
+    )
+
     return render(
         request,
         "app/events.html",
-        {"events": events, "user_is_organizer": request.user.is_organizer, "user_id": request.user.id},
+        {
+            "events": events,
+            "user_is_organizer": request.user.is_organizer,
+            "user_favorites": user_favorites,
+            "show_favorites": show_favorites,
+        },
     )
-
 
 @login_required
 def event_detail(request, id):
@@ -617,3 +634,21 @@ def delete_venue(request, id):
 def venue_detail(request, venue_id):
     venue = get_object_or_404(Venue, pk=venue_id)
     return render(request, 'app/venue_detail.html', {'venue': venue})
+
+@login_required
+def toggle_favorite(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    favorite, created = FavoriteEvent.objects.get_or_create(user=request.user, event=event)
+
+    if not created:
+        favorite.delete()
+        messages.success(request, "Evento eliminado de tus favoritos.")
+    else:
+        messages.success(request, "Evento agregado a tus favoritos.")
+
+    return redirect("events")
+
+from django.shortcuts import redirect
+
+
+
