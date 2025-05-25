@@ -63,6 +63,17 @@ class EventBaseTest(BaseE2ETest):
             venue=self.venue,
             category=self.category
         )
+        self.category2=Category.objects.create(
+            name="Test2",
+            description="Test Category"
+        )
+        self.venue2=Venue.objects.create(
+            name="Test2",
+            address="Test",
+            city="Test",
+            capacity=100,
+            contact="test"
+        )
 
     def _table_has_event_info(self):
         """Método auxiliar para verificar que la tabla tiene la información correcta de eventos"""
@@ -245,9 +256,11 @@ class EventCRUDTest(EventBaseTest):
         self.page.get_by_label("Descripción").fill("Descripción creada desde prueba E2E")
         self.page.get_by_label("Fecha").fill("2025-06-15")
         self.page.get_by_label("Hora").fill("16:45")
+        self.page.get_by_label("Categoría").select_option(label="Test")
+        self.page.get_by_label("Lugar").select_option(label="Test")
 
         # Enviar el formulario
-        self.page.get_by_role("button", name="Crear Evento").click()
+        self.page.query_selector('[name="Crear Evento"]').click()
 
         # Verificar que redirigió a la página de eventos
         expect(self.page).to_have_url(f"{self.live_server_url}/events/")
@@ -260,6 +273,9 @@ class EventCRUDTest(EventBaseTest):
         expect(row.locator("td").nth(0)).to_have_text("Evento de prueba E2E")
         expect(row.locator("td").nth(1)).to_have_text("Descripción creada desde prueba E2E")
         expect(row.locator("td").nth(2)).to_have_text("15 jun 2025, 16:45")
+        expect(row.locator("td").nth(3)).to_have_text("ACTIVO")
+        expect(row.locator("td").nth(4)).to_have_text("Test")
+
 
     def test_edit_event_organizer(self):
         """Test que verifica la funcionalidad de editar un evento para organizadores"""
@@ -295,9 +311,19 @@ class EventCRUDTest(EventBaseTest):
         time = self.page.get_by_label("Hora")
         expect(time).to_have_value("10:10")
         time.fill("03:00")
+        
+        venue=self.page.get_by_label("Lugar")
+        expect(venue).to_have_value("7")
+        venue.select_option(label="Test2")
+        expect(venue).to_have_value("8")
+
+        estado=self.page.get_by_label("Estado")
+        expect(estado).to_have_value("ACTIVO")
+        estado.select_option(label="Agotado")
+        expect(estado).to_have_value("AGOTADO")
 
         # Enviar el formulario
-        self.page.get_by_role("button", name="Crear Evento").click()
+        self.page.query_selector('[name="Crear Evento"]').click()
 
         # Verificar que redirigió a la página de eventos
         expect(self.page).to_have_url(f"{self.live_server_url}/events/")
@@ -307,6 +333,7 @@ class EventCRUDTest(EventBaseTest):
         expect(row.locator("td").nth(0)).to_have_text("Titulo editado")
         expect(row.locator("td").nth(1)).to_have_text("Descripcion Editada")
         expect(row.locator("td").nth(2)).to_have_text("20 abr 2025, 03:00")
+        
 
 
     def test_delete_event_organizer(self):
