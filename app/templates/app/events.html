@@ -23,6 +23,18 @@
                 Comentarios
             </a>
         {% endif %}
+
+        <form method="get" action="{% url 'events' %}" class="ms-3">
+            <input type="hidden" name="favorites" value="{% if not show_favorites %}1{% endif %}">
+            <button type="submit" class="btn btn-outline-warning">
+                {% if show_favorites %}
+                    <i class="bi bi-star-fill"></i> Ver Todos
+                {% else %}
+                    <i class="bi bi-star"></i> Solo Favoritos
+                {% endif %}
+            </button>
+        </form>
+
     </div>
     <table class="table">
         <thead>
@@ -32,6 +44,8 @@
                 <th>Fecha</th>
                 <th>Categoría</th>
                 <th>Acciones</th>
+                <th>Favorito</th>
+
             </tr>
         </thead>
         <tbody>
@@ -68,6 +82,21 @@
                                 </form>
                             {% endif %}
                         </div>
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'toggle_favorite' event.id %}">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                class="btn btn-sm {% if event.id in user_favorites %}
+                                btn-warning{% else %}btn-outline-warning{% endif %}" title="Favorito" aria-label="Favorito"
+                                style="margin-left: 13px;">
+                                {% if event.id in user_favorites %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            </button>
+                        </form>
                     </td>
                 </tr>
             {% empty %}
