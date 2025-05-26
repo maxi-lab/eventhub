@@ -1,0 +1,17 @@
+<div class="row"  style="padding-bottom: 2%;">
+     <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Entradas</h5>
+                <p class="card-text">Entradas vendidas: {{ tickets_count }} de {{ venue_capacity }}</p>
+                {% if tickets_percentage < 10 %}
+                    <div class="alert alert-danger" role="alert">
+                        Baja demanda. Solo {{tickets_percentage}}% de entradas vendidas. 
+                    </div>
+                {% elif tickets_percentage > 90 %}
+                <div class="alert alert-danger" role="alert">
+                     Alta demanda. {{tickets_percentage}}% de entradas vendidas. 
+                </div>
+                {% endif %}
+            </div>
+        </div>
+</div>

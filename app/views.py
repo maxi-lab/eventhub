@@ -84,8 +84,11 @@ def event_detail(request, id):
     user_comments = Comment.objects.filter(event = event, user = request.user).exclude(isDeleted = True)
     other_comments = Comment.objects.filter(event = event, isDeleted=False).exclude(user = request.user)
     comments_count = user_comments.count() + other_comments.count()
+    tickets_count = sum(ticket.quantity for ticket in event.tickets.all())
+    venue_capacity = event.venue.capacity
+    tickets_percentage = round(tickets_count / venue_capacity * 100, 2)
 
-    return render(request, "app/event_detail.html", {"event": event, "user_comments": user_comments, "other_comments": other_comments, "comments_count": comments_count, "user_is_organizer": request.user.is_organizer})
+    return render(request, "app/event_detail.html", {"event": event, "user_comments": user_comments, "other_comments": other_comments, "comments_count": comments_count, "user_is_organizer": request.user.is_organizer, "tickets_count": tickets_count, "venue_capacity": venue_capacity, "tickets_percentage": tickets_percentage})
 
 
 @login_required
