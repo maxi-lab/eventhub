@@ -178,6 +178,42 @@ class Notification(models.Model):
     users = models.ManyToManyField(User, through='UserNotification', related_name="notifications")
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="notifications", null=True, blank=True)
 
+    @staticmethod
+    def validate_notification(title, message, event_id=None, recipients_type=None, user_id=None):
+        errors = {}
+        
+        if not title:
+            errors['title'] = "El título es obligatorio"
+        elif len(title) < 5:
+            errors['title'] = "El título debe tener al menos 5 caracteres"
+        elif len(title) > 200:
+            errors['title'] = "El título no puede exceder los 200 caracteres"
+            
+        if not message:
+            errors['message'] = "El mensaje es obligatorio"
+        elif len(message) < 10:
+            errors['message'] = "El mensaje debe tener al menos 10 caracteres"
+            
+        if recipients_type == 'all' and not event_id:
+            errors['event'] = "Debes seleccionar un evento si deseas notificar a todos los asistentes"
+            
+        if recipients_type == 'user' and not user_id:
+            errors['user'] = "Debes seleccionar un usuario específico"
+            
+        if event_id:
+            try:
+                Event.objects.get(pk=event_id)
+            except Event.DoesNotExist:
+                errors['event'] = "El evento seleccionado no existe"
+                
+        if user_id:
+            try:
+                User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                errors['user'] = "El usuario seleccionado no existe"
+                
+        return errors
+
 class UserNotification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     notification = models.ForeignKey(Notification, on_delete=models.CASCADE)

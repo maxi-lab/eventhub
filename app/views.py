@@ -70,11 +70,27 @@ def home(request):
 
 @login_required
 def events(request):
-    events = Event.objects.all().order_by("scheduled_at")
+    show_past = request.GET.get('show_past', 'false') == 'true'
+    current_date = timezone.now()
+
+    if show_past:
+        events = Event.objects.filter(
+            scheduled_at__lt=current_date
+        ).order_by('-scheduled_at')
+    else:
+        events = Event.objects.filter(
+            scheduled_at__gte=current_date
+        ).order_by('scheduled_at')
+
     return render(
         request,
         "app/events.html",
-        {"events": events, "user_is_organizer": request.user.is_organizer, "user_id": request.user.id},
+        {
+            "events": events,
+            "user_is_organizer": request.user.is_organizer,
+            "user_id": request.user.id,
+            "show_past": show_past,
+        },
     )
 
 
@@ -297,18 +313,24 @@ def notifications_form(request, pk=None):
         recipients_type = request.POST.get('recipients') 
         user_id = request.POST.get('user')
 
-        if not title or not message:
-            messages.error(request, "Título y mensaje son obligatorios.")
-            return redirect(request.path)
+        errors = Notification.validate_notification(
+            title=title,
+            message=message,
+            event_id=event_id if event_id else None,
+            recipients_type=recipients_type if not is_edit else None,
+            user_id=user_id if not is_edit else None
+        )
 
-        if not is_edit:
-            if recipients_type == 'all' and not event_id:
-                messages.error(request, "Debes seleccionar un evento si deseas notificar a todos los asistentes.")
-                return redirect(request.path)
-
-            if recipients_type == 'user' and not user_id:
-                messages.error(request, "Debes seleccionar un usuario específico.")
-                return redirect(request.path)
+        if errors:
+            for error_msg in errors.values():
+                messages.error(request, error_msg)
+            return render(request, 'app/notifications_form.html', {
+                'notification': notification,
+                'is_edit': is_edit,
+                'events': Event.objects.all(),
+                'users': User.objects.all(),
+                'form_data': request.POST,
+            })
 
         event = get_object_or_404(Event, pk=event_id) if event_id else None
 
@@ -335,11 +357,23 @@ def notifications_form(request, pk=None):
 
         return redirect('notifications_organizer')
 
+    # Inicializar form_data vacío para la primera carga
+    form_data = {}
+    if notification:
+        form_data = {
+            'title': notification.title,
+            'message': notification.message,
+            'priority': notification.priority,
+        }
+        if notification.event:
+            form_data['event'] = notification.event.id
+
     return render(request, 'app/notifications_form.html', {
         'notification': notification,
         'is_edit': is_edit,
         'events': Event.objects.all(),
         'users': User.objects.all(),
+        'form_data': form_data,
     })
 
     
