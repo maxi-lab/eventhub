@@ -14,7 +14,7 @@ class FavoriteEventViewTest(TestCase):
             email='usuario@xd.com',
             password='usuario123'
         )
-        self.client.login(username='testuser', password='testpass123')
+        self.client.login(username='usuario123', password='usuario123')
 
         # Crear categoría y venue
         self.category = Category.objects.create(

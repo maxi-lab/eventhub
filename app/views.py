@@ -646,9 +646,8 @@ def toggle_favorite(request, event_id):
     else:
         messages.success(request, "Evento agregado a tus favoritos.")
 
-    return redirect("events")
-
-from django.shortcuts import redirect
+    next_url = request.POST.get('next') or request.GET.get('next') or request.META.get('HTTP_REFERER') or '/events/'
+    return redirect(next_url)
 
 
 

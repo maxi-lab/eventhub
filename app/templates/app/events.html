@@ -24,16 +24,18 @@
             </a>
         {% endif %}
 
-        <form method="get" action="{% url 'events' %}" class="ms-3">
-            <input type="hidden" name="favorites" value="{% if not show_favorites %}1{% endif %}">
-            <button type="submit" class="btn btn-outline-warning">
-                {% if show_favorites %}
-                    <i class="bi bi-star-fill"></i> Ver Todos
-                {% else %}
-                    <i class="bi bi-star"></i> Solo Favoritos
-                {% endif %}
-            </button>
-        </form>
+    <div class="ms-3">
+        {% if show_favorites %}
+            <a href="{% url 'events' %}" class="btn btn-outline-warning">
+                <i class="bi bi-star-fill"></i> Ver Todos
+            </a>
+        {% else %}
+            <a href="{% url 'events' %}?favorites=1" class="btn btn-outline-warning">
+                <i class="bi bi-star"></i> Solo Favoritos
+            </a>
+        {% endif %}
+    </div>
+
 
     </div>
     <table class="table">
@@ -86,9 +88,10 @@
                     <td>
                         <form method="post" action="{% url 'toggle_favorite' event.id %}">
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
                             <button type="submit" 
-                                class="btn btn-sm {% if event.id in user_favorites %}
-                                btn-warning{% else %}btn-outline-warning{% endif %}" title="Favorito" aria-label="Favorito"
+                                class="btn btn-sm {% if event.id in user_favorites %}btn-warning{% else %}btn-outline-warning{% endif %}" 
+                                title="Favorito" aria-label="Favorito"
                                 style="margin-left: 13px;">
                                 {% if event.id in user_favorites %}
                                     <i class="bi bi-star-fill"></i>
@@ -101,7 +104,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">No hay eventos disponibles</td>
+                    <td colspan="6" class="text-center">No hay eventos disponibles</td>
                 </tr>
             {% endfor %}
         </tbody>
