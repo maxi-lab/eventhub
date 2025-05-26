@@ -6,28 +6,62 @@
     <div class="container">
         <h1>Crear Lugar</h1>
 
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
         <form method="POST">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="name" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="name" name="name" required>
+                <input 
+                    type="text" class="form-control" id="name" name="name" 
+                    value="{{ data.name|default_if_none:'' }}" required>
+                {% if errors.name %}
+                    <div class="text-danger">{{ errors.name }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 <label for="address" class="form-label">Dirección</label>
-                <input type="text" class="form-control" id="address" name="address" required>
+                <input 
+                    type="text" class="form-control" id="address" name="address" 
+                    value="{{ data.address|default_if_none:'' }}" required>
+                {% if errors.address %}
+                    <div class="text-danger">{{ errors.address }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 <label for="city" class="form-label">Ciudad</label>
-                <input type="text" class="form-control" id="city" name="city" required>
+                <input 
+                    type="text" class="form-control" id="city" name="city" 
+                    value="{{ data.city|default_if_none:'' }}" required>
+                {% if errors.city %}
+                    <div class="text-danger">{{ errors.city }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 <label for="capacity" class="form-label">Capacidad</label>
-                <input type="number" class="form-control" id="capacity" name="capacity" required>
+                <input 
+                    type="number" class="form-control" id="capacity" name="capacity" 
+                    value="{{ data.capacity|default_if_none:'' }}" required>
+                {% if errors.capacity %}
+                    <div class="text-danger">{{ errors.capacity }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 <label for="contact" class="form-label">Contacto</label>
-                <input type="text" class="form-control" id="contact" name="contact" required>
+                <input 
+                    type="text" class="form-control" id="contact" name="contact" 
+                    value="{{ data.contact|default_if_none:'' }}" required>
+                {% if errors.contact %}
+                    <div class="text-danger">{{ errors.contact }}</div>
+                {% endif %}
             </div>
+
             <button type="submit" class="btn btn-success">Crear Lugar</button>
         </form>
     </div>

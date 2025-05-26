@@ -628,35 +628,38 @@ def create_venue(request):
         capacity = request.POST.get('capacity')
         contact = request.POST.get('contact')
 
-        if not name or not address or not city or not capacity or not contact:
-            return HttpResponse("Todos los campos son obligatorios", status=400)
-
-        venue = Venue.objects.create(
-            name=name,
-            address=address,
-            city=city,
-            capacity=capacity,
-            contact=contact
-        )
-
-        return redirect('list_venues')
+        validation_result = Venue.validate_data(name, address, city, capacity, contact)
+        if isinstance(validation_result, dict) and 'name' in validation_result and 'address' in validation_result:
+            venue = Venue.objects.create(**validation_result)
+            return redirect('list_venues')
+        else:
+            return render(request, 'app/venue_form.html', {'errors': validation_result, 'data': request.POST})
 
     return render(request, 'app/venue_form.html')
 
+@login_required
 def edit_venue(request, id):
     venue = get_object_or_404(Venue, id=id)
-    
-    if request.method == 'POST':
-        venue.name = request.POST.get('name')
-        venue.address = request.POST.get('address')
-        venue.city = request.POST.get('city')
-        venue.capacity = request.POST.get('capacity')
-        venue.contact = request.POST.get('contact')
-        venue.save()
 
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        capacity = request.POST.get('capacity')
+        contact = request.POST.get('contact')
+
+        errors_or_data = Venue.validate_data(name, address, city, capacity, contact)
+        
+        if isinstance(errors_or_data, dict) and any(k in ['name', 'address', 'city', 'capacity', 'contact'] for k in errors_or_data):
+            return render(request, 'app/venue_edit.html', {'venue': venue, 'errors': errors_or_data})
+
+        for attr, value in errors_or_data.items():
+            setattr(venue, attr, value)
+        venue.save()
         return redirect('list_venues')
 
     return render(request, 'app/venue_edit.html', {'venue': venue})
+
 
 @login_required
 def delete_venue(request, id):
