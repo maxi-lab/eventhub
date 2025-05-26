@@ -147,6 +147,25 @@ class Event(models.Model):
         )
 
         return True, None
+    
+    def total_tickets_sold(self):
+        return self.tickets.filter(is_deleted=False).aggregate(
+            total=models.Sum('quantity')
+        )['total'] or 0
+
+    def update_state_if_sold_out(self):
+        print('fssfdsf')
+        total_tickets = self.total_tickets_sold()
+        capacidad = self.venue.capacity
+        print(total_tickets)
+
+        if total_tickets >= capacidad and self.state != EventState.SOLD_OUT:
+            self.state = EventState.SOLD_OUT
+            self.save()
+        elif total_tickets < capacidad and self.state == EventState.SOLD_OUT:
+            self.state = EventState.ACTIVE  
+      
+            self.save()    
 
     def update(self, title, description, scheduled_at, organizer, category, venue, state):
         self.title = title or self.title

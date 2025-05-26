@@ -413,20 +413,39 @@ def ticket_form(request,id=None):
                 e=e+' '+card[i]
             
             return render(request,'app/ticket_form.html',{"events":events,"ticket":ticket,"error":e})
-        
+
         event=get_object_or_404(Event, pk=event_id)
+        
+        total_vendidos = event.total_tickets_sold()
+        capacidad = event.venue.capacity
+
+        if total_vendidos + quantity > capacidad:
+            return render(request, 'app/ticket_form.html', {
+                "events": events,
+                "ticket": ticket,
+                "error": "No hay suficiente cupo disponible para este evento."
+        })
+
         if id is None:
             print("Creando nuevo ticket")
             Ticket.new(tipo_ticket,event,user,quantity)
+            event.update_state_if_sold_out()
             return redirect("tickets")
         Ticket.update_ticket(id, tipo_ticket, event,quantity=quantity)
+
+        
         return redirect("tickets")
     return render(request, "app/ticket_form.html", {"events":events,"ticket":ticket})
+
 def ticket_delete(request, id):
     if request.method == "POST":
+        ticket = get_object_or_404(Ticket, pk=id)
+        event = ticket.event
         Ticket.delete_ticket(id)
+        event.update_state_if_sold_out()
         return redirect("tickets")
     return redirect("tickets")
+
 def ticket_detail(request, id):
     ticket = get_object_or_404(Ticket, pk=id)
     tipos=Ticket.TICKET_TYPES
