@@ -146,6 +146,18 @@ class Event(models.Model):
 
         self.save()
 
+    @property
+    def venue_capacity(self):
+        return self.venue.capacity
+
+    @property
+    def ticket_count(self):
+        return sum(ticket.quantity for ticket in self.tickets.all())
+
+    @property
+    def tickets_percentage(self):
+        return round(self.ticket_count / self.venue_capacity * 100, 2)
+
 
 class Priority(models.TextChoices):
     HIGH = "HIGH", "Alta"
