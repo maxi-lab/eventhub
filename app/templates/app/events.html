@@ -5,41 +5,65 @@
 {% block content %}
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Eventos</h1>
-        {% if user_is_organizer %}
-            <a
-                href="{% url 'event_form' %}"
-                class="btn btn-primary"
-                style="margin-left: auto"
-            >
-                <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
-                Crear Evento
+        <h1>
+            {% if show_past %}
+                Eventos pasados
+            {% else %}
+                Eventos
+            {% endif %}
+        </h1>
+        <div class="d-flex gap-2">
+            <a href="?show_past={% if show_past %}false{% else %}true{% endif %}{% if show_favorites %}&favorites=1{% endif %}" class="btn btn-primary">
+                {% if show_past %}
+                    <i class="bi bi-clock"></i> Ver eventos actuales
+                {% else %}
+                    <i class="bi bi-clock-history"></i> Ver eventos pasados
+                {% endif %}
             </a>
-            <a
-                href="{% url 'admin_comments'%}"
-                class="btn btn-primary"
-                style="margin-left: 10px"
-            >
-                Comentarios
-            </a>
-        {% endif %}
+
+            {% if user_is_organizer %}
+                <a href="{% url 'event_form' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>
+                    Crear Evento
+                </a>
+                <a href="{% url 'admin_comments' %}" class="btn btn-primary">
+                    Comentarios
+                </a>
+            {% endif %}
+
+            <div class="ms-3">
+                {% if show_favorites %}
+                    <a href="{% url 'events' %}{% if show_past %}?show_past=true{% endif %}" class="btn btn-outline-warning">
+                        <i class="bi bi-star-fill"></i> Ver Todos
+                    </a>
+                {% else %}
+                    <a href="{% url 'events' %}?favorites=1{% if show_past %}&show_past=true{% endif %}" class="btn btn-outline-warning">
+                        <i class="bi bi-star"></i> Solo Favoritos
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
+
     <table class="table">
         <thead>
             <tr>
                 <th>Título</th>
                 <th>Descripción</th>
                 <th>Fecha</th>
+                <th>Estado</th>
                 <th>Categoría</th>
                 <th>Acciones</th>
+                <th>Favorito</th>
             </tr>
         </thead>
         <tbody>
-            {% for event in events%}
+            {% for event in events %}
                 <tr>
                     <td>{{ event.title }}</td>
                     <td>{{ event.description }}</td>
                     <td>{{ event.scheduled_at|date:"d b Y, H:i" }}</td>
+                    <td>{{ event.state }}</td>
                     <td>{{ event.category.name }}</td>
                     <td>
                         <div class="hstack gap-1">
@@ -51,28 +75,50 @@
                             </a>
                             {% if user_is_organizer %}
                                 <a href="{% url 'event_edit' event.id %}"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    aria-label="Editar" 
-                                    title="Editar">
+                                   class="btn btn-sm btn-outline-secondary"
+                                   aria-label="Editar"
+                                   title="Editar">
                                     <i class="bi bi-pencil" aria-hidden="true"></i>
                                 </a>
                                 <form action="{% url 'event_delete' event.id %}" method="POST">
                                     {% csrf_token %}
                                     <button class="btn btn-sm btn-outline-danger"
-                                        title="Eliminar"
-                                        type="submit"
-                                        aria-label="Eliminar"
-                                        titile="Eliminar">
+                                            title="Eliminar"
+                                            type="submit"
+                                            aria-label="Eliminar"
+                                            name="Eliminar">
                                         <i class="bi bi-trash" aria-hidden="true"></i>
                                     </button>
                                 </form>
                             {% endif %}
                         </div>
                     </td>
+                    <td>
+                        <form method="post" action="{% url 'toggle_favorite' event.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit"
+                                    class="btn btn-sm {% if event.id in user_favorites %}btn-warning{% else %}btn-outline-warning{% endif %}"
+                                    title="Favorito" aria-label="Favorito"
+                                    style="margin-left: 13px;">
+                                {% if event.id in user_favorites %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">No hay eventos disponibles</td>
+                    <td colspan="7" class="text-center">
+                        {% if show_past %}
+                            No hay eventos pasados
+                        {% else %}
+                            No hay eventos disponibles
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

@@ -55,7 +55,7 @@
                             <p class="mb-0">{{ event.venue }}</p>
                         </div>
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-5">
                         <div class="d-flex align-items-center mb-3">
                             <div class="bg-light rounded-circle p-2 me-3">
                                 <p class="mb-0">
@@ -67,6 +67,20 @@
                                 <p class="mb-0">{{ event.category.name }}</p>
                             </div>
                         </div>
+                        <div>
+                            <h6 class="mb-0">Estado</h6>
+                            <p class="mb-0">{{event.state}}</p>
+                        </div>
+                        {% if event.state == "CANCELADO" %}
+                        <div>
+                            <p>Este evento ha sido cancelado por cuestiones externas al evento, la empresa se reserva el dercho a reembolsos</p>
+                        </div>
+                        {% endif %}
+                        {% if event.state == "REPROGRAMADO" %}
+                        <div>
+                            <p>Este evento se reprogramó para {{ event.scheduled_at|date:"l, j \\d\\e F \\d\\e Y, H:i" }}</p>
+                        </div>
+                        {% endif %}
                     </div>
                     </div>
                 </div>
