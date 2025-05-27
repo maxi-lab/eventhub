@@ -5,7 +5,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from app.models import Event, User
+from app.models import Event, User, Category, Venue
 
 
 class BaseEventTestCase(TestCase):
@@ -42,6 +42,29 @@ class BaseEventTestCase(TestCase):
             scheduled_at=timezone.now() + datetime.timedelta(days=2),
             organizer=self.organizer,
         )
+        self.category=Category.objects.create(
+            name="category_test",
+            description="categoria de prueba"
+        )
+        self.venue=Venue.objects.create(
+            name="Test",
+            address="Test",
+            city="Test",
+            capacity=100,
+            contact="Test"
+        )
+        self.category2=Category.objects.create(
+            name="category_test2",
+            description="categoria de prueba"
+        )
+        self.venue2=Venue.objects.create(
+            name="Test2",
+            address="Test",
+            city="Test",
+            capacity=100,
+            contact="Test"
+        )
+        self.state="CANCELADO"
 
         # Cliente para hacer peticiones
         self.client = Client()
@@ -190,13 +213,16 @@ class EventFormSubmissionTest(BaseEventTestCase):
         """Test que verifica que se puede crear un evento mediante POST"""
         # Login con usuario organizador
         self.client.login(username="organizador", password="password123")
-
+        id_cat=self.category.pk
+        id_venue=self.venue.pk
         # Crear datos para el evento
         event_data = {
             "title": "Nuevo Evento",
             "description": "Descripción del nuevo evento",
             "date": "2025-05-01",
             "time": "14:30",
+            "category":id_cat,
+            "venue":id_venue
         }
 
         # Hacer petición POST a la vista event_form
@@ -221,13 +247,16 @@ class EventFormSubmissionTest(BaseEventTestCase):
         """Test que verifica que se puede editar un evento existente mediante POST"""
         # Login con usuario organizador
         self.client.login(username="organizador", password="password123")
-
+        id_new_venue=self.venue2.pk
+        id_new_cat=self.category2.pk
         # Datos para actualizar el evento
         updated_data = {
             "title": "Evento 1 Actualizado",
             "description": "Nueva descripción actualizada",
             "date": "2025-06-15",
             "time": "16:45",
+            "venue":id_new_venue,
+            "category":id_new_cat,
         }
 
         # Hacer petición POST para editar el evento

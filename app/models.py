@@ -93,10 +93,22 @@ class Venue(models.Model):
     def __str__(self):
         return self.name
     
+class EventState(models.TextChoices):
+    ACTIVE="ACTIVO","Activo"
+    CANCELED="CANCELADO","Cancelado"
+    RESCHEDULED="REPROGRAMADO","Reprogramado"
+    SOLD_OUT="AGOTADO","Agotado"
+    FINISHED="TERMINADO","Terminado"
+
 class Event(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     scheduled_at = models.DateTimeField()
+    state=models.CharField(
+        max_length=50,
+        choices=EventState.choices,
+        default=EventState.ACTIVE
+    )
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="organized_events")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -136,13 +148,14 @@ class Event(models.Model):
 
         return True, None
 
-    def update(self, title, description, scheduled_at, organizer, category, venue):
+    def update(self, title, description, scheduled_at, organizer, category, venue, state):
         self.title = title or self.title
         self.description = description or self.description
         self.scheduled_at = scheduled_at or self.scheduled_at
         self.organizer = organizer or self.organizer
         self.category = category or self.category
         self.venue = venue or self.venue
+        self.state=state or self.state
 
         self.save()
 
@@ -164,6 +177,42 @@ class Notification(models.Model):
     )
     users = models.ManyToManyField(User, through='UserNotification', related_name="notifications")
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="notifications", null=True, blank=True)
+
+    @staticmethod
+    def validate_notification(title, message, event_id=None, recipients_type=None, user_id=None):
+        errors = {}
+        
+        if not title:
+            errors['title'] = "El título es obligatorio"
+        elif len(title) < 5:
+            errors['title'] = "El título debe tener al menos 5 caracteres"
+        elif len(title) > 200:
+            errors['title'] = "El título no puede exceder los 200 caracteres"
+            
+        if not message:
+            errors['message'] = "El mensaje es obligatorio"
+        elif len(message) < 10:
+            errors['message'] = "El mensaje debe tener al menos 10 caracteres"
+            
+        if recipients_type == 'all' and not event_id:
+            errors['event'] = "Debes seleccionar un evento si deseas notificar a todos los asistentes"
+            
+        if recipients_type == 'user' and not user_id:
+            errors['user'] = "Debes seleccionar un usuario específico"
+            
+        if event_id:
+            try:
+                Event.objects.get(pk=event_id)
+            except Event.DoesNotExist:
+                errors['event'] = "El evento seleccionado no existe"
+                
+        if user_id:
+            try:
+                User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                errors['user'] = "El usuario seleccionado no existe"
+                
+        return errors
 
 class UserNotification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -73,12 +73,21 @@ def home(request):
 @login_required
 def events(request):
     show_favorites = request.GET.get("favorites") == "1"
+    show_past = request.GET.get('show_past', 'false') == 'true'
+    current_date = timezone.now()
+
+    events = Event.objects.all()
 
     if show_favorites:
         favorite_event_ids = FavoriteEvent.objects.filter(user=request.user).values_list("event_id", flat=True)
-        events = Event.objects.filter(id__in=favorite_event_ids).order_by("scheduled_at")
+        events = events.filter(id__in=favorite_event_ids)
+
+    if show_past:
+        events = events.filter(scheduled_at__lt=current_date)
     else:
-        events = Event.objects.all().order_by("scheduled_at")
+        events = events.filter(scheduled_at__gte=current_date)
+
+    events = events.order_by('scheduled_at')
 
     user_favorites = set(
         FavoriteEvent.objects.filter(user=request.user).values_list("event_id", flat=True)
@@ -92,8 +101,11 @@ def events(request):
             "user_is_organizer": request.user.is_organizer,
             "user_favorites": user_favorites,
             "show_favorites": show_favorites,
+            "user_id": request.user.id,
+            "show_past": show_past,
         },
     )
+
 
 @login_required
 def event_detail(request, id):
@@ -130,6 +142,7 @@ def event_tickets(request,id):
 @login_required
 def event_form(request, id=None):
     user = request.user
+    
 
     if not user.is_organizer:
         return redirect("events")
@@ -153,7 +166,9 @@ def event_form(request, id=None):
             Event.new(title, description, scheduled_at, request.user, category, venue)
         else:
             event = get_object_or_404(Event, pk=id)
-            event.update(title, description, scheduled_at, request.user, category, venue)
+            state=request.POST.get("state")
+            print(state)
+            event.update(title, description, scheduled_at, request.user, category, venue,state)
 
         return redirect("events")
 
@@ -311,18 +326,24 @@ def notifications_form(request, pk=None):
         recipients_type = request.POST.get('recipients') 
         user_id = request.POST.get('user')
 
-        if not title or not message:
-            messages.error(request, "Título y mensaje son obligatorios.")
-            return redirect(request.path)
+        errors = Notification.validate_notification(
+            title=title,
+            message=message,
+            event_id=event_id if event_id else None,
+            recipients_type=recipients_type if not is_edit else None,
+            user_id=user_id if not is_edit else None
+        )
 
-        if not is_edit:
-            if recipients_type == 'all' and not event_id:
-                messages.error(request, "Debes seleccionar un evento si deseas notificar a todos los asistentes.")
-                return redirect(request.path)
-
-            if recipients_type == 'user' and not user_id:
-                messages.error(request, "Debes seleccionar un usuario específico.")
-                return redirect(request.path)
+        if errors:
+            for error_msg in errors.values():
+                messages.error(request, error_msg)
+            return render(request, 'app/notifications_form.html', {
+                'notification': notification,
+                'is_edit': is_edit,
+                'events': Event.objects.all(),
+                'users': User.objects.all(),
+                'form_data': request.POST,
+            })
 
         event = get_object_or_404(Event, pk=event_id) if event_id else None
 
@@ -349,11 +370,23 @@ def notifications_form(request, pk=None):
 
         return redirect('notifications_organizer')
 
+    # Inicializar form_data vacío para la primera carga
+    form_data = {}
+    if notification:
+        form_data = {
+            'title': notification.title,
+            'message': notification.message,
+            'priority': notification.priority,
+        }
+        if notification.event:
+            form_data['event'] = notification.event.id
+
     return render(request, 'app/notifications_form.html', {
         'notification': notification,
         'is_edit': is_edit,
         'events': Event.objects.all(),
         'users': User.objects.all(),
+        'form_data': form_data,
     })
 
     
@@ -375,7 +408,7 @@ def tickets(request):
 
 def ticket_form(request,id=None):
     ticket = {}
-    events = Event.objects.all()
+    events = Event.objects.exclude(state="FINALIZADO")
     user=request.user
     if id is not None:
         ticket=get_object_or_404(Ticket, pk=id)
