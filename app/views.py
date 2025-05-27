@@ -393,6 +393,7 @@ def tickets(request):
     tipo=Ticket.TICKET_TYPES
     return render(request, "app/tickets.html", {"tickets": tickets, "tipo": tipo})
 
+@login_required
 def ticket_form(request,id=None):
     ticket = {}
     events = Event.objects.exclude(state="FINALIZADO")
@@ -416,8 +417,6 @@ def ticket_form(request,id=None):
 
         event=get_object_or_404(Event, pk=event_id)
         
-        total_vendidos = event.total_tickets_sold()
-        capacidad = event.venue.capacity
 
         if not hay_cupo_disponible(event, quantity):
             return render(request, 'app/ticket_form.html', {
