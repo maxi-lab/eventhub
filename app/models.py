@@ -187,10 +187,8 @@ class Event(models.Model):
         )['total'] or 0
 
     def update_state_if_sold_out(self):
-        print('fssfdsf')
         total_tickets = self.total_tickets_sold()
         capacidad = self.venue.capacity
-        print(total_tickets)
 
         if total_tickets >= capacidad and self.state != EventState.SOLD_OUT:
             self.state = EventState.SOLD_OUT
@@ -479,6 +477,16 @@ class Comment(models.Model):
         self.save()
     
 
+class FavoriteEvent(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorite_events")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="favorited_by")
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'event') 
+
+    def __str__(self):
+        return f"{self.user.username} {self.event.title}"
 
 
 

@@ -10,9 +10,11 @@ from django.http import HttpResponseForbidden
 from .models import RefundRequest
 from .models import Event, User, Ticket, Venue
 from django.http import HttpResponseForbidden, HttpResponse
-from .models import Event, User, UserNotification, Notification
+from .models import Event, User, UserNotification, Notification, FavoriteEvent
 from .models import Category
 from django.db.models import Count
+from django.urls import reverse
+
 
 def is_admin(user):
     return user.is_organizer
@@ -70,17 +72,26 @@ def home(request):
 
 @login_required
 def events(request):
+    show_favorites = request.GET.get("favorites") == "1"
     show_past = request.GET.get('show_past', 'false') == 'true'
     current_date = timezone.now()
 
+    events = Event.objects.all()
+
+    if show_favorites:
+        favorite_event_ids = FavoriteEvent.objects.filter(user=request.user).values_list("event_id", flat=True)
+        events = events.filter(id__in=favorite_event_ids)
+
     if show_past:
-        events = Event.objects.filter(
-            scheduled_at__lt=current_date
-        ).order_by('-scheduled_at')
+        events = events.filter(scheduled_at__lt=current_date)
     else:
-        events = Event.objects.filter(
-            scheduled_at__gte=current_date
-        ).order_by('scheduled_at')
+        events = events.filter(scheduled_at__gte=current_date)
+
+    events = events.order_by('scheduled_at')
+
+    user_favorites = set(
+        FavoriteEvent.objects.filter(user=request.user).values_list("event_id", flat=True)
+    )
 
     return render(
         request,
@@ -88,6 +99,8 @@ def events(request):
         {
             "events": events,
             "user_is_organizer": request.user.is_organizer,
+            "user_favorites": user_favorites,
+            "show_favorites": show_favorites,
             "user_id": request.user.id,
             "show_past": show_past,
         },
@@ -426,7 +439,6 @@ def ticket_form(request,id=None):
         })
 
         if id is None:
-            print("Creando nuevo ticket")
             Ticket.new(tipo_ticket,event,user,quantity)
             event.update_state_if_sold_out()
             return redirect("tickets")
@@ -680,3 +692,20 @@ def delete_venue(request, id):
 def venue_detail(request, venue_id):
     venue = get_object_or_404(Venue, pk=venue_id)
     return render(request, 'app/venue_detail.html', {'venue': venue})
+
+@login_required
+def toggle_favorite(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    favorite, created = FavoriteEvent.objects.get_or_create(user=request.user, event=event)
+
+    if not created:
+        favorite.delete()
+        messages.success(request, "Evento eliminado de tus favoritos.")
+    else:
+        messages.success(request, "Evento agregado a tus favoritos.")
+
+    next_url = request.POST.get('next') or request.GET.get('next') or request.META.get('HTTP_REFERER') or '/events/'
+    return redirect(next_url)
+
+
+
