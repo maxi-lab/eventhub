@@ -419,7 +419,7 @@ def ticket_form(request,id=None):
         total_vendidos = event.total_tickets_sold()
         capacidad = event.venue.capacity
 
-        if total_vendidos + quantity > capacidad:
+        if not hay_cupo_disponible(event, quantity):
             return render(request, 'app/ticket_form.html', {
                 "events": events,
                 "ticket": ticket,
@@ -436,6 +436,11 @@ def ticket_form(request,id=None):
         
         return redirect("tickets")
     return render(request, "app/ticket_form.html", {"events":events,"ticket":ticket})
+
+
+def hay_cupo_disponible(event, cantidad):
+    return event.total_tickets_sold() + cantidad <= event.venue.capacity
+
 
 def ticket_delete(request, id):
     if request.method == "POST":
