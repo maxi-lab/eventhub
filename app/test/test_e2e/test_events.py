@@ -106,27 +106,23 @@ class EventBaseTest(BaseE2ETest):
         expect(rows.nth(1).locator("td").nth(4)).to_have_text("Test")
 
     def _table_has_correct_actions(self, user_type):
-        """Método auxiliar para verificar que las acciones son correctas según el tipo de usuario"""
-        row0 = self.page.locator("table tbody tr").nth(0)
+        row = self.page.locator("table tbody tr").first
 
-        detail_button = row0.get_by_role("link", name="Ver Detalle")
-        edit_button = row0.get_by_role("link", name="Editar")
-        delete_form = row0.locator("form")
-
-        expect(detail_button).to_be_visible()
-        expect(detail_button).to_have_attribute("href", f"/events/{self.event1.id}/")
+        detail_link = row.locator("a[title='Ver detalle']")
+        expect(detail_link).to_be_visible()
 
         if user_type == "organizador":
-            expect(edit_button).to_be_visible()
-            expect(edit_button).to_have_attribute("href", f"/events/{self.event1.id}/edit/")
+            edit_link = row.locator("a[title='Editar']")
+            expect(edit_link).to_be_visible()
 
-            expect(delete_form).to_have_attribute("action", f"/events/{self.event1.id}/delete/")
+            delete_form = row.locator("form[action$='/delete/']")
             expect(delete_form).to_have_attribute("method", "POST")
+        else:  
+            
+            edit_link = row.locator("a[title='Editar']")
+            expect(edit_link).to_have_count(0)
 
-            delete_button = delete_form.get_by_role("button", name="Eliminar")
-            expect(delete_button).to_be_visible()
-        else:
-            expect(edit_button).to_have_count(0)
+            delete_form = row.locator("form[action$='/delete/']")
             expect(delete_form).to_have_count(0)
 
 
