@@ -313,9 +313,9 @@ class EventCRUDTest(EventBaseTest):
         time.fill("03:00")
         
         venue=self.page.get_by_label("Lugar")
-        expect(venue).to_have_value("7")
+        expect(venue).to_have_value("9")
         venue.select_option(label="Test2")
-        expect(venue).to_have_value("8")
+        expect(venue).to_have_value("10")
 
         estado=self.page.get_by_label("Estado")
         expect(estado).to_have_value("ACTIVO")
