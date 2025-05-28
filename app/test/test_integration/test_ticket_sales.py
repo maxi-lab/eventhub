@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from app.models import Event, Ticket, Venue
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 class TicketSalesIntegrationTest(TestCase):
     def setUp(self):
@@ -13,7 +14,7 @@ class TicketSalesIntegrationTest(TestCase):
         self.venue = Venue.objects.create(name='Test Venue', address='123', capacity=100)
         self.event = Event.objects.create(
             title='Integration Test Event',
-            scheduled_at=datetime.now() + timedelta(days=1),
+            scheduled_at=timezone.now() + timedelta(days=1),
             venue=self.venue,
             organizer=self.user
         )
@@ -37,7 +38,7 @@ class LowDemandTest(TestCase):
         self.venue = Venue.objects.create(name='Test Venue', address='123', capacity=100)
         self.event = Event.objects.create(
             title='Integration Test Event',
-            scheduled_at=datetime.now() + timedelta(days=1),
+            scheduled_at=timezone.now() + timedelta(days=1),
             venue=self.venue,
             organizer=self.user
         )
@@ -59,7 +60,7 @@ class HighDemandTest(TestCase):
         self.venue = Venue.objects.create(name='Test Venue', address='123', capacity=100)
         self.event = Event.objects.create(
             title='Integration Test Event',
-            scheduled_at=datetime.now() + timedelta(days=1),
+            scheduled_at=timezone.now() + timedelta(days=1),
             venue=self.venue,
             organizer=self.user
         )

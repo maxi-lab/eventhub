@@ -34,7 +34,7 @@ class TicketSaleBaseEvent(BaseE2ETest):
             description="Descripción de prueba",
             venue=self.venue,
             organizer=user,
-            scheduled_at=datetime.now() + timedelta(days=1)
+            scheduled_at=timezone.now() + timedelta(days=1)
         )
         Ticket.objects.create(event=event, quantity=8, user=self.organizer)
 
