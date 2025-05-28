@@ -4,13 +4,10 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from playwright.sync_api import expect
 from app.test.test_e2e.base import BaseE2ETest
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from playwright.sync_api import sync_playwright
 
-class TicketSaleBaseEvent(StaticLiveServerTestCase):
+class TicketSaleBaseEvent(BaseE2ETest):
     def setUp(self):
         super().setUp()
-        self.playwright = sync_playwright().start()
         self.browser = self.playwright.chromium.launch(headless=True)
         self.context = self.browser.new_context()
         self.page = self.context.new_page()
