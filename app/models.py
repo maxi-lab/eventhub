@@ -93,6 +93,39 @@ class Venue(models.Model):
     def __str__(self):
         return self.name
     
+    @staticmethod
+    def validate_data(name, address, city, capacity, contact):
+        errors = {}
+
+        if not name or not name.strip():
+            errors['name'] = "El nombre es obligatorio."
+        elif len(name.strip()) < 5:
+            errors['name'] = "El nombre debe tener al menos 5 caracteres."
+        if not address or not address.strip():
+            errors['address'] = "La dirección es obligatoria."
+        if not city or not city.strip():
+            errors['city'] = "La ciudad es obligatoria."
+        if not contact or not contact.strip():
+            errors['contact'] = "El contacto es obligatorio."
+
+        try:
+            capacity_int = int(capacity)
+            if capacity_int <= 0:
+                errors['capacity'] = "La capacidad debe ser un número mayor a cero."
+        except (ValueError, TypeError):
+            errors['capacity'] = "La capacidad debe ser un número válido."
+
+        if errors:
+            return errors
+        else:
+            return {
+                'name': name.strip(),
+                'address': address.strip(),
+                'city': city.strip(),
+                'capacity': capacity_int,
+                'contact': contact.strip()
+            }
+    
 class EventState(models.TextChoices):
     ACTIVE="ACTIVO","Activo"
     CANCELED="CANCELADO","Cancelado"
@@ -147,6 +180,23 @@ class Event(models.Model):
         )
 
         return True, None
+    
+    def total_tickets_sold(self):
+        return self.tickets.filter(is_deleted=False).aggregate(
+            total=models.Sum('quantity')
+        )['total'] or 0
+
+    def update_state_if_sold_out(self):
+        total_tickets = self.total_tickets_sold()
+        capacidad = self.venue.capacity
+
+        if total_tickets >= capacidad and self.state != EventState.SOLD_OUT:
+            self.state = EventState.SOLD_OUT
+            self.save()
+        elif total_tickets < capacidad and self.state == EventState.SOLD_OUT:
+            self.state = EventState.ACTIVE  
+      
+            self.save()    
 
     def update(self, title, description, scheduled_at, organizer, category, venue, state):
         self.title = title or self.title

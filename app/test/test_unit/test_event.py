@@ -137,7 +137,7 @@ class EventModelTest(TestCase):
         self.assertEqual(updated_event.scheduled_at.time(), new_scheduled_at.time())
 
     def test_event_update_partial(self):
-        """Test que verifica la actualización parcial de eventos"""
+        """Test que verifica la actualización de los eventos"""
         event = Event.objects.create(
             title="Evento de prueba",
             description="Descripción del evento de prueba",
@@ -256,4 +256,5 @@ class EventFilterTest(TestCase):
         future_events = Event.objects.filter(scheduled_at__gte=self.now)
         self.assertEqual(future_events.count(), 1)
         self.assertEqual(future_events[0], self.future_event)
+
 

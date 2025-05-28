@@ -33,9 +33,15 @@
                 <label for="event_id" class="form-label">Evento</label>
                 <select class="form-select" id="event_id" name="event_id" required>
                     {% for event in events %}
-                        <option value="{{ event.id }}">
-                            {{ event.title }}
-                        </option>
+                        {% if event.state == "AGOTADO" %}
+                            <option value="{{ event.id }}" disabled>{{ event.title }} - AGOTADO</option>
+                        {% else %}
+                            <option value="{{ event.id }}"
+                                {% if ticket.event.id == event.id %}selected{% endif %}
+                            >
+                                {{ event.title }}
+                            </option>
+                        {% endif %}
                     {% endfor %}
                 </select>
                 <label for="">Numero de tarjeta</label>
