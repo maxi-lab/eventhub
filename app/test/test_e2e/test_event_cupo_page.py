@@ -21,9 +21,9 @@ class TestTicketPurchase(BaseE2ETest):
         self.organizer = User.objects.create_user(username="organizer", password="12345")
         # Categoría y venue
         self.category = Category.objects.create(name="Conciertos")
-        self.venue = Venue.objects.create(name="Auditorio", capacity=5)
+        self.venue = Venue.objects.create(name="Auditorio", capacity=3)
 
-        # Evento agotado (5 tickets vendidos)
+        # Evento agotado (3 tickets vendidos)
         self.sold_out_event = Event.objects.create(
             title="Evento Agotado",
             description="Evento sin cupo",
@@ -33,7 +33,7 @@ class TestTicketPurchase(BaseE2ETest):
             venue=self.venue,
             state=EventState.ACTIVE
         )
-        Ticket.objects.create(type_ticket="GRL", event=self.sold_out_event, user=self.buyer, quantity=5)
+        Ticket.objects.create(type_ticket="GRL", event=self.sold_out_event, user=self.buyer, quantity=3)
         self.sold_out_event.update_state_if_sold_out()
         self.sold_out_event.refresh_from_db()
 
@@ -95,7 +95,7 @@ class TestTicketPurchase(BaseE2ETest):
         self.page.goto(f"{self.live_server_url}/tickets/create/")
 
         self.page.select_option("select[name='event_id']", str(self.active_event.id))
-        self.page.fill("input[name='quantity']", "4")
+        self.page.fill("input[name='quantity']", "2")
         self.page.fill("input[name='card_number']", "2345432675126435")
         self.page.fill("input[name='expiration_date']", "12/29")
         self.page.fill("input[name='cvv']", "323")

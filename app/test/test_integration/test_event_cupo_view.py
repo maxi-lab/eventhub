@@ -16,7 +16,7 @@ class TicketIntegrationTest(TestCase):
             name="Venue 1",
             address="Address 1",
             city="City",
-            capacity=5,  # capacidad pequeña para probar agotamiento rápido
+            capacity=3,  # capacidad pequeña para probar agotamiento rápido
             contact="123456"
         )
         self.category = Category.objects.create(
@@ -37,7 +37,7 @@ class TicketIntegrationTest(TestCase):
         response = self.client.post(reverse('ticket_form'), {
             'type_ticket': 'GRL',
             'event_id': self.event.id,
-            'quantity': 3,
+            'quantity': 2,
             'card_number': '1234567890123456',
             'expiration_date': '12/25',
             'cvv': '123',
@@ -47,13 +47,13 @@ class TicketIntegrationTest(TestCase):
         self.assertRedirects(response, reverse('tickets'))
         self.event.refresh_from_db()
         self.assertEqual(self.event.state, 'ACTIVO')
-        self.assertEqual(self.event.total_tickets_sold(), 3)
+        self.assertEqual(self.event.total_tickets_sold(), 2)
 
-        # 2. Intentar comprar más tickets que el cupo restante (2 disponibles)
+        # 2. Intentar comprar más tickets que el cupo restante (1 disponibles)
         response = self.client.post(reverse('ticket_form'), {
             'type_ticket': 'GRL',
             'event_id': self.event.id,
-            'quantity': 3,  # 3 > 2 restantes
+            'quantity': 2,  # 2 > 1 restantes
             'card_number': '1234567890123456',
             'expiration_date': '12/25',
             'cvv': '123',
@@ -61,11 +61,11 @@ class TicketIntegrationTest(TestCase):
         })
         self.assertContains(response, "No hay suficiente cupo disponible para este evento.")
 
-        # 3. Comprar tickets para agotar el cupo restante (2 tickets)
+        # 3. Comprar tickets para agotar el cupo restante (1 tickets)
         response = self.client.post(reverse('ticket_form'), {
             'type_ticket': 'GRL',
             'event_id': self.event.id,
-            'quantity': 2,
+            'quantity': 1,
             'card_number': '1234567890123456',
             'expiration_date': '12/25',
             'cvv': '123',
@@ -74,7 +74,7 @@ class TicketIntegrationTest(TestCase):
         self.assertRedirects(response, reverse('tickets'))
         self.event.refresh_from_db()
         self.assertEqual(self.event.state, 'AGOTADO')
-        self.assertEqual(self.event.total_tickets_sold(), 5)
+        self.assertEqual(self.event.total_tickets_sold(), 3)
 
         # 4. Verificar que el evento agotado no aparece como opción seleccionable (GET en formulario)
         response = self.client.get(reverse('ticket_form'))
