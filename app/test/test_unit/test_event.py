@@ -137,7 +137,7 @@ class EventModelTest(TestCase):
         self.assertEqual(updated_event.scheduled_at.time(), new_scheduled_at.time())
 
     def test_event_update_partial(self):
-        """Test que verifica la actualización parcial de eventos"""
+        """Test que verifica la actualización de los eventos"""
         event = Event.objects.create(
             title="Evento de prueba",
             description="Descripción del evento de prueba",
