@@ -429,6 +429,17 @@ def ticket_form(request,id=None):
             return render(request,'app/ticket_form.html',{"events":events,"ticket":ticket,"error":e})
 
         event=get_object_or_404(Event, pk=event_id)
+
+        # Validación de máximo 4 entradas por usuario y evento
+        entradas_existentes = Ticket.objects.filter(event=event, user=user, is_deleted=False)
+        total_entradas = sum(t.quantity for t in entradas_existentes)
+        if total_entradas + quantity > 4:
+            return render(request, 'app/ticket_form.html', {
+                "events": events,
+                "ticket": ticket,
+                "error": "No puedes comprar más de 4 entradas para este evento. Ya tienes {} y estás intentando comprar {}.".format(total_entradas, quantity)
+            })
+
         
 
         if not hay_cupo_disponible(event, quantity):
@@ -437,6 +448,7 @@ def ticket_form(request,id=None):
                 "ticket": ticket,
                 "error": "No hay suficiente cupo disponible para este evento."
         })
+
 
         if id is None:
             Ticket.new(tipo_ticket,event,user,quantity)
