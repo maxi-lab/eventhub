@@ -257,3 +257,4 @@ class EventFilterTest(TestCase):
         self.assertEqual(future_events.count(), 1)
         self.assertEqual(future_events[0], self.future_event)
 
+

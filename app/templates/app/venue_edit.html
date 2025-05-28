@@ -11,27 +11,42 @@
             
             <div class="mb-3">
                 <label for="name" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="name" name="name" value="{{ venue.name }}" required>
+                <input type="text" class="form-control {% if errors.name %}is-invalid{% endif %}" id="name" name="name" value="{{ venue.name }}" required>
+                {% if errors.name %}
+                    <div class="invalid-feedback">{{ errors.name }}</div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
                 <label for="address" class="form-label">Dirección</label>
-                <input type="text" class="form-control" id="address" name="address" value="{{ venue.address }}" required>
+                <input type="text" class="form-control {% if errors.address %}is-invalid{% endif %}" id="address" name="address" value="{{ venue.address }}" required>
+                {% if errors.address %}
+                    <div class="invalid-feedback">{{ errors.address }}</div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
                 <label for="city" class="form-label">Ciudad</label>
-                <input type="text" class="form-control" id="city" name="city" value="{{ venue.city }}" required>
+                <input type="text" class="form-control {% if errors.city %}is-invalid{% endif %}" id="city" name="city" value="{{ venue.city }}" required>
+                {% if errors.city %}
+                    <div class="invalid-feedback">{{ errors.city }}</div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
                 <label for="capacity" class="form-label">Capacidad</label>
-                <input type="number" class="form-control" id="capacity" name="capacity" value="{{ venue.capacity }}" required>
+                <input type="number" class="form-control {% if errors.capacity %}is-invalid{% endif %}" id="capacity" name="capacity" value="{{ venue.capacity }}" required>
+                {% if errors.capacity %}
+                    <div class="invalid-feedback">{{ errors.capacity }}</div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
                 <label for="contact" class="form-label">Contacto</label>
-                <input type="text" class="form-control" id="contact" name="contact" value="{{ venue.contact }}" required>
+                <input type="text" class="form-control {% if errors.contact %}is-invalid{% endif %}" id="contact" name="contact" value="{{ venue.contact }}" required>
+                {% if errors.contact %}
+                    <div class="invalid-feedback">{{ errors.contact }}</div>
+                {% endif %}
             </div>
 
             <button type="submit" class="btn btn-success">Guardar Cambios</button>
