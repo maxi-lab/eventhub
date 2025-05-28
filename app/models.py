@@ -301,7 +301,7 @@ class Ticket(models.Model):
     def __str__(self):
         return f"{self.type_ticket} - {self.event.title} - {self.user.username}"
     @classmethod
-    def new(cls, type_ticket, event, user,quantity):
+    def new(cls, type_ticket, event, user, quantity):
         errors = {}
         if type_ticket == "":
             errors["type_ticket"] = "Por favor ingrese un tipo de ticket"
@@ -309,21 +309,24 @@ class Ticket(models.Model):
             errors["event"] = "Por favor seleccione un evento"
         if user is None:
             errors["user"] = "Por favor seleccione un usuario"
-        if quantity<=0:
-            errors["quantity"]="Una cantidad positiva"
-        
-        
+        if quantity <= 0:
+            errors["quantity"] = "Una cantidad positiva"
+        # Validación de máximo 4 tickets por usuario y evento
+        if event is not None and user is not None and quantity > 0:
+            tickets_existentes = Ticket.objects.filter(event=event, user=user, is_deleted=False)
+            total_existente = sum(t.quantity for t in tickets_existentes)
+            if total_existente + quantity > 4:
+                errors["max_tickets"] = f"No puedes comprar más de 4 entradas para este evento. Ya tienes {total_existente} y estás intentando comprar {quantity}."
         if len(errors.keys()) > 0:
             return False, errors
         characters = string.ascii_letters + string.digits
         code = ''.join(random.choice(characters) for _ in range(10))
-        
         Ticket.objects.create(
-        type_ticket=type_ticket,
-        event=event,
-        user=user,
-        quantity=quantity,
-        code=code,
+            type_ticket=type_ticket,
+            event=event,
+            user=user,
+            quantity=quantity,
+            code=code,
         )
         return True, None 
     @classmethod
@@ -487,7 +490,7 @@ class Comment(models.Model):
     def delete(self):
         self.isDeleted = True
         self.save()
-    
+
 
 class FavoriteEvent(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorite_events")
