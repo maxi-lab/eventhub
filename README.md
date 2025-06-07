@@ -36,3 +36,5 @@ AplicaciÃ³n web para venta de entradas utilizada en la cursada 2025 de IngenierÃ
 ## Iniciar app
 
 `python manage.py runserver`
+
+<!-- Prueba #1 de push para verificar el funcionamiento de CI -->
