@@ -19,8 +19,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t eventhub/eventhub:${{ github.ref_name }} .
-          docker push eventhub/eventhub:${{ github.ref_name }}
+          docker build -t augustocheca/eventhub:${{ github.ref_name }} .
+          docker push augustocheca/eventhub:${{ github.ref_name }}
 
       ##- name: Deploy to Render
       ##  uses: render-examples/deploy-render@v1
