@@ -22,8 +22,8 @@ jobs:
           docker build -t augustocheca/eventhub:${{ github.ref_name }} .
           docker push augustocheca/eventhub:${{ github.ref_name }}
 
-      ##- name: Deploy to Render
-      ##  uses: render-examples/deploy-render@v1
-      ##  with:
-      ##    api_key: ${{ secrets.RENDER_API_KEY }}
-      ##   service_id: ${{ secrets.RENDER_SERVICE_ID }}
+      - name: Deploy to Render
+        uses: render-examples/deploy-render@v1
+        with:
+          api_key: ${{ secrets.RENDER_API_KEY }}
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
