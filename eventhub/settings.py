@@ -135,3 +135,9 @@ LOGIN_REDIRECT_URL = "/events/"
 LOGIN_URL = "/accounts/login/"
 
 LOGOUT_REDIRECT_URL = "/accounts/login/"
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://eventhub-r1a8.onrender.com",
+    "http://localhost",
+    "http://127.0.0.1",
+]
