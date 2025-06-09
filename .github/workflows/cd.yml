@@ -1,98 +1,29 @@
-name: CD EventHub # Nombre de tu workflow de Entrega Continua
+name: CD EventHub
 
 on:
   release:
-    types: [published] # Este workflow se activa cuando se publica una nueva "Release" en GitHub
+    types: [published]
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest # Ejecuta en una máquina virtual de Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository # Obtiene el código del repositorio
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Get Release Commit SHA # Paso para obtener el SHA del commit de la Release
-        id: get_release_sha
-        run: |
-          # El SHA del commit HEAD en el momento de la release.
-          RELEASE_COMMIT_SHA=$(git rev-parse HEAD)
-          echo "Release commit SHA: $RELEASE_COMMIT_SHA"
-          echo "release_sha=$RELEASE_COMMIT_SHA" >> $GITHUB_OUTPUT
-
-      - name: Check CI Workflow Status for Release Commit # VERIFICA que la CI ha pasado para este commit
-        uses: actions/github-script@v6
-        id: check_ci_status
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }} # Token automático provisto por GitHub Actions
-          script: |
-            const releaseSha = process.env.RELEASE_COMMIT_SHA;
-            console.log(`Checking CI status for commit: ${releaseSha}`);
-
-            // Busca las ejecuciones del workflow de CI para el commit de la release.
-            // Es CRÍTICO que 'workflow_id' coincida con el 'name' de tu workflow de CI en ci.yml
-            const { data: workflowRuns } = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head_sha: releaseSha,
-              workflow_id: 'CI EventHub', # <-- ¡ESTE DEBE SER EL NOMBRE EXACTO DE TU CI!
-              event: 'push' # La CI se dispara con 'push' a 'main'
-            });
-
-            // Encuentra la ejecución más reciente y completa del workflow de CI
-            const latestCiRun = workflowRuns.workflow_runs.find(run => 
-              run.status === 'completed' && run.conclusion !== null
-            );
-
-            if (!latestCiRun) {
-              core.setFailed(`No completed CI run found for commit ${releaseSha} with workflow "CI EventHub". Deployment aborted.`);
-              return;
-            }
-
-            console.log(`Latest CI run status: ${latestCiRun.status}, conclusion: ${latestCiRun.conclusion}`);
-            
-            if (latestCiRun.conclusion !== 'success') {
-              core.setFailed(`CI for commit ${releaseSha} failed with conclusion: ${latestCiRun.conclusion}. Aborting deployment.`);
-            } else {
-              core.setOutput('ci_passed', 'true');
-            }
-        env:
-          RELEASE_COMMIT_SHA: ${{ steps.get_release_sha.outputs.release_sha }} # Pasa el SHA a la acción
-
-      # a. Buildear la imagen de Docker y publicarla en Docker Hub
       - name: Log in to Docker Hub
-        # Solo se ejecuta si la CI del commit de la release pasó.
-        if: success() && steps.check_ci_status.outputs.ci_passed == 'true'
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }} # Secreto de GitHub para tu usuario de Docker Hub
-          password: ${{ secrets.DOCKERHUB_TOKEN }} # Secreto de GitHub para tu token de Docker Hub
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: success() && steps.check_ci_status.outputs.ci_passed == 'true'
         run: |
-          # Usamos el nombre de la release (ej. v1.0.0) como tag para la imagen.
-          # Esto es una práctica estándar para imágenes de producción asociadas a releases.
-          IMAGE_TAG_RELEASE=${{ github.ref_name }} # github.ref_name es el nombre de la release
-          IMAGE_NAME=augustocheca/eventhub # Tu nombre de usuario en Docker Hub / Nombre del repositorio de la imagen
-          
-          echo "Building Docker image with tag: ${IMAGE_NAME}:${IMAGE_TAG_RELEASE}"
-          docker build -t ${IMAGE_NAME}:${IMAGE_TAG_RELEASE} .
-          docker push ${IMAGE_NAME}:${IMAGE_TAG_RELEASE}
+          docker build -t augustocheca/eventhub:${{ github.ref_name }} .
+          docker push augustocheca/eventhub:${{ github.ref_name }}
 
-          # Opcional pero recomendado: También tageamos la imagen como 'latest' y la pusheamos.
-          # Si Render está configurado para "Auto-Deploy" y jala 'latest' de Docker Hub,
-          # esto asegura que la versión de la release sea la última disponible.
-          echo "Tagging and pushing Docker image as 'latest'"
-          docker tag ${IMAGE_NAME}:${IMAGE_TAG_RELEASE} ${IMAGE_NAME}:latest
-          docker push ${IMAGE_NAME}:latest
-
-      # b. Utilizar Render para distribuir la app
       - name: Deploy to Render
-        if: success() && steps.check_ci_status.outputs.ci_passed == 'true'
-        uses: render-com/deploy-action@v1
+        uses: render-examples/deploy-render@v1
         with:
-          api_key: ${{ secrets.RENDER_API_KEY }} # Secreto de GitHub para tu API Key de Render
-          service_id: ${{ secrets.RENDER_SERVICE_ID }} # Secreto de GitHub para el Service ID de Render
-          # Esta acción le indica a Render que active un nuevo despliegue.
-          # Render, a su vez, tomará la imagen configurada en tu servicio (probablemente 'latest' de Docker Hub).
+          api_key: ${{ secrets.RENDER_API_KEY }}
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
