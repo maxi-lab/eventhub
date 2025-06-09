@@ -90,7 +90,7 @@ jobs:
       # b. Utilizar Render para distribuir la app
       - name: Deploy to Render
         if: success() && steps.check_ci_status.outputs.ci_passed == 'true'
-        uses: render-examples/deploy-render@v1
+        uses: render-com/deploy-action@v1
         with:
           api_key: ${{ secrets.RENDER_API_KEY }} # Secreto de GitHub para tu API Key de Render
           service_id: ${{ secrets.RENDER_SERVICE_ID }} # Secreto de GitHub para el Service ID de Render
