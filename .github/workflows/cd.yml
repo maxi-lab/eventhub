@@ -1,35 +1,31 @@
 name: CD EventHub
 
 on:
-  workflow_run:
-    workflows: ["CI EventHub"]
-    types:
-      - completed
+    workflow_run:
+        workflows: ["CI EventHub"]
+        branches: [main]
+        types:
+            - completed
 
 jobs:
-  deploy:
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      (
-        (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') ||
-        github.event.workflow_run.event == 'release'
-      )
-    runs-on: ubuntu-latest
+    deploy:
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v2
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        run: |
-          docker build -t augustocheca/eventhub:${{ github.ref_name }} -t augustocheca/eventhub:latest .
-          docker push augustocheca/eventhub:${{ github.ref_name }}
-          docker push augustocheca/eventhub:latest
+            - name: Build and push Docker image
+              run: |
+                  docker build -t augustocheca/eventhub:${{ github.ref_name }} -t augustocheca/eventhub:latest .
+                  docker push augustocheca/eventhub:${{ github.ref_name }}
+                  docker push augustocheca/eventhub:latest
 
-      - name: Trigger redeploy on Render
-        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+            - name: Trigger redeploy on Render
+              run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
