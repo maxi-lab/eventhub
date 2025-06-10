@@ -1,8 +1,11 @@
 name: CD EventHub
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["CI EventHub"]
+    branches: [main]
+    types:
+      - completed
 
 jobs:
   deploy:
