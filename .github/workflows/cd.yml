@@ -3,14 +3,17 @@ name: CD EventHub
 on:
   workflow_run:
     workflows: ["CI EventHub"]
-    branches: [main]
     types:
       - completed
-  release:
-    types: [published]    
 
 jobs:
   deploy:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      (
+        (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') ||
+        github.event.workflow_run.event == 'release'
+      )
     runs-on: ubuntu-latest
 
     steps:
