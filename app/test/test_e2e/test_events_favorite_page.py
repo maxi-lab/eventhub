@@ -29,8 +29,8 @@ class FavoriteEventsE2ETest(BaseE2ETest):
             contact="contacto123@xd.com"
         )
 
-        event_date1 = timezone.make_aware(datetime.datetime(2025, 6, 10, 10, 0))
-        event_date2 = timezone.make_aware(datetime.datetime(2025, 7, 10, 12, 0))
+        event_date1 = timezone.make_aware(datetime.datetime(2026, 6, 10, 10, 0))
+        event_date2 = timezone.make_aware(datetime.datetime(2027, 7, 10, 12, 0))
 
         self.event1 = Event.objects.create(
             title="Evento Favorito 1",
