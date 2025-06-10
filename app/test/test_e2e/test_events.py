@@ -43,7 +43,7 @@ class EventBaseTest(BaseE2ETest):
 
         # Crear eventos de prueba
         # Evento 1
-        event_date1 = timezone.make_aware(datetime.datetime(2025, 6, 10, 10, 10))
+        event_date1 = timezone.make_aware(datetime.datetime(2026, 6, 10, 10, 10))
         self.event1 = Event.objects.create(
             title="Evento de prueba 1",
             description="Descripción del evento 1",
@@ -54,7 +54,7 @@ class EventBaseTest(BaseE2ETest):
         )
 
         # Evento 2
-        event_date2 = timezone.make_aware(datetime.datetime(2025, 7, 15, 14, 30))
+        event_date2 = timezone.make_aware(datetime.datetime(2027, 7, 15, 14, 30))
         self.event2 = Event.objects.create(
             title="Evento de prueba 2",
             description="Descripción del evento 2",
@@ -94,14 +94,14 @@ class EventBaseTest(BaseE2ETest):
         row0 = rows.nth(0)
         expect(row0.locator("td").nth(0)).to_have_text("Evento de prueba 1")
         expect(row0.locator("td").nth(1)).to_have_text("Descripción del evento 1")
-        expect(row0.locator("td").nth(2)).to_have_text("10 jun 2025, 10:10")
+        expect(row0.locator("td").nth(2)).to_have_text("10 jun 2026, 10:10")
         expect(row0.locator("td").nth(3)).to_have_text("ACTIVO")
         expect(row0.locator("td").nth(4)).to_have_text("Test")
 
         # Verificar datos del segundo evento
         expect(rows.nth(1).locator("td").nth(0)).to_have_text("Evento de prueba 2")
         expect(rows.nth(1).locator("td").nth(1)).to_have_text("Descripción del evento 2")
-        expect(rows.nth(1).locator("td").nth(2)).to_have_text("15 jul 2025, 14:30")
+        expect(rows.nth(1).locator("td").nth(2)).to_have_text("15 jul 2027, 14:30")
         expect(rows.nth(1).locator("td").nth(3)).to_have_text("ACTIVO")
         expect(rows.nth(1).locator("td").nth(4)).to_have_text("Test")
 
@@ -256,7 +256,7 @@ class EventCRUDTest(EventBaseTest):
         self.page.get_by_label("Lugar").select_option(label="Test")
 
         # Enviar el formulario
-        self.page.query_selector('[name="Crear Evento"]').click()
+        self.page.get_by_role("button", name="Crear Evento").click()
 
         # Verificar que redirigió a la página de eventos
         expect(self.page).to_have_url(f"{self.live_server_url}/events/")
@@ -285,7 +285,7 @@ class EventCRUDTest(EventBaseTest):
         self.page.get_by_role("link", name="Editar").first.click()
 
         # Verificar que estamos en la página de edición
-        expect(self.page).to_have_url(f"{self.live_server_url}/events/{self.event1.id}/edit/")
+        expect(self.page).to_have_url(f"{self.live_server_url}/events/{self.event1.pk}/edit/")
 
         header = self.page.locator("h1")
         expect(header).to_have_text("Editar evento")
@@ -301,17 +301,17 @@ class EventCRUDTest(EventBaseTest):
         description.fill("Descripcion Editada")
 
         date = self.page.get_by_label("Fecha")
-        expect(date).to_have_value("2025-06-10")
-        date.fill("2025-07-20")
+        expect(date).to_have_value("2026-06-10")
+        date.fill("2026-07-20")
 
         time = self.page.get_by_label("Hora")
         expect(time).to_have_value("10:10")
         time.fill("03:00")
         
         venue=self.page.get_by_label("Lugar")
-        expect(venue).to_have_value(str(self.venue.id))
+        expect(venue).to_have_value(str(self.venue.pk))
         venue.select_option(label="Test2")
-        expect(venue).to_have_value(str(self.venue2.id))
+        expect(venue).to_have_value(str(self.venue2.pk))
 
         estado=self.page.get_by_label("Estado")
         expect(estado).to_have_value("ACTIVO")
@@ -319,17 +319,16 @@ class EventCRUDTest(EventBaseTest):
         expect(estado).to_have_value("AGOTADO")
 
         # Enviar el formulario
-        self.page.query_selector('[name="Crear Evento"]').click()
+        self.page.get_by_role("button", name="Actualizar Evento").click()
 
         # Verificar que redirigió a la página de eventos
         expect(self.page).to_have_url(f"{self.live_server_url}/events/")
 
         # Verificar que el título del evento ha sido actualizado
-        row = self.page.locator("table tbody tr").last
+        row = self.page.locator("table tbody tr").filter(has_text="Titulo editado")
         expect(row.locator("td").nth(0)).to_have_text("Titulo editado")
         expect(row.locator("td").nth(1)).to_have_text("Descripcion Editada")
-        expect(row.locator("td").nth(2)).to_have_text("20 jul 2025, 03:00")
-        
+        expect(row.locator("td").nth(2)).to_have_text("20 jul 2026, 03:00")
 
 
     def test_delete_event_organizer(self):

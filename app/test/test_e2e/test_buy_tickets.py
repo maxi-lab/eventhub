@@ -43,7 +43,7 @@ class BuyTicketsBaseTest(BaseE2ETest):
 
         # Crear eventos de prueba
         # Evento 1
-        event_date1 = timezone.make_aware(datetime.datetime(2025, 6, 10, 10, 10))
+        event_date1 = timezone.make_aware(datetime.datetime(2026, 6, 10, 10, 10))
         self.event1 = Event.objects.create(
             title="Evento de prueba 1",
             description="Descripción del evento 1",
@@ -55,7 +55,7 @@ class BuyTicketsBaseTest(BaseE2ETest):
         )
 
         # Evento 2
-        event_date2 = timezone.make_aware(datetime.datetime(2025, 7, 15, 14, 30))
+        event_date2 = timezone.make_aware(datetime.datetime(2027, 7, 15, 14, 30))
         self.event2 = Event.objects.create(
             title="Evento de prueba 2",
             description="Descripción del evento 2",
