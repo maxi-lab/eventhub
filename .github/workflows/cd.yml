@@ -1,0 +1,30 @@
+name: CD EventHub
+
+on:
+  workflow_run:
+    workflows: ["CI EventHub"]
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t augustocheca/eventhub:${{ github.ref_name }} -t augustocheca/eventhub:latest .
+          docker push augustocheca/eventhub:${{ github.ref_name }}
+          docker push augustocheca/eventhub:latest
+
+      - name: Trigger redeploy on Render
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
