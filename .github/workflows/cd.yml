@@ -3,6 +3,7 @@ name: CD EventHub
 on:
   workflow_run:
     workflows: ["CI EventHub"]
+    branches: [main]
     types:
       - completed
 
