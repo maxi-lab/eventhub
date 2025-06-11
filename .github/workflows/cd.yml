@@ -15,7 +15,7 @@ jobs:
   deploy:
     name: deploy
     runs-on: ubuntu-latest
-    needs: ci
+    needs: CI EventHub
     steps:
       - uses: actions/checkout@v4
       - name: Log in to Docker Hub
