@@ -5,6 +5,13 @@ on:
     types: [published]
 
 jobs:
+  fict:
+    name: fict
+    runs-on: ubuntu-latest
+    steps:
+      - name: print
+        run: |
+         echo "hello"
   deploy:
     name: deploy
     runs-on: ubuntu-latest
