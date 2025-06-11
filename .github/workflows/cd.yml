@@ -9,7 +9,6 @@ on:
 
 
 jobs:
-jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
