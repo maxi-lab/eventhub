@@ -464,6 +464,8 @@ def ticket_form(request,id=None):
 
 
 def hay_cupo_disponible(event, cantidad):
+    if event.venue is None:
+        return False
     return event.total_tickets_sold() + cantidad <= event.venue.capacity
 
 
