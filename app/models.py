@@ -187,6 +187,9 @@ class Event(models.Model):
         )['total'] or 0
 
     def update_state_if_sold_out(self):
+        if self.venue is None:
+            return
+        
         total_tickets = self.total_tickets_sold()
         capacidad = self.venue.capacity
 
@@ -211,7 +214,7 @@ class Event(models.Model):
 
     @property
     def venue_capacity(self):
-        return self.venue.capacity
+        return self.venue.capacity if self.venue else 0
 
     @property
     def ticket_count(self):
@@ -219,7 +222,9 @@ class Event(models.Model):
 
     @property
     def tickets_percentage(self):
-        return round(self.ticket_count / self.venue_capacity * 100, 2)
+        if not self.venue or self.venue.capacity == 0:
+            return 0
+        return round(self.ticket_count / self.venue.capacity * 100, 2)
 
 
 class Priority(models.TextChoices):
